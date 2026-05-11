@@ -190,53 +190,61 @@ After installation and restart:
 
 ### NVIDIA RTX VSR model files
 
-The `nvidia-vfx` Python package provides the engine, but the **neural network
-weights are distributed separately** as part of the NVIDIA Video Effects SDK.
+All model files live **inside your ComfyUI folder** — no system directories needed:
 
-**Step 1 — Download the SDK:**
+```
+ComfyUI_windows_portable\ComfyUI\models\
+  nvidia_vsr\              ← NVIDIA VSR model files go here
+    SuperRes_CG_2x.nvmdl
+    SuperRes_CG_4x.nvmdl
+    (other .nvmdl / .bin files from the SDK)
+```
+
+Our node registers `nvidia_vsr` as a model type inside ComfyUI and checks
+that folder first automatically.
+
+**Step 1 — Download the NVIDIA Video Effects SDK:**
 ```
 https://developer.nvidia.com/rtx-video-sdk
 ```
 
-**Step 2 — Run the installer.**
-Model files are placed automatically at:
+**Step 2 — Run the SDK installer.**
+Models land at:
 ```
 C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
 ```
-ComfyUI and all scripts in this project find them there automatically.
 
-**Step 3 — Verify:**
+**Step 3 — Copy the model files into ComfyUI:**
+```powershell
+Copy-Item `
+  "C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\*" `
+  "ComfyUI_windows_portable\ComfyUI\models\nvidia_vsr\" `
+  -Recurse
+```
+
+**Step 4 — Verify:**
 ```powershell
 ComfyUI_windows_portable\python_embeded\python.exe scripts\check_environment.py
 ```
 Look for: `[PASS] NVVFX model directory`
 
-**Custom model path** — if you installed to a different location:
-```powershell
-$env:NVVFX_SDK_PATH = "D:\NvVFX\models"
-```
+The node searches in this order:
+| Priority | Path |
+|----------|------|
+| 1st | `ComfyUI\models\nvidia_vsr\` — everything inside ComfyUI |
+| 2nd | `NVVFX_SDK_PATH` env var — custom override |
+| 3rd | `C:\Program Files\NVIDIA Corporation\...` — SDK fallback |
 
 ---
 
 ### Stable Diffusion checkpoint (workflow 07 only)
 
-Workflow `07_ai_gen_image_enhance.json` uses a KSampler to generate an image
-before passing it to RTX VSR. It requires a Stable Diffusion checkpoint.
-
-**Where it goes** — inside your ComfyUI portable installation:
 ```
 ComfyUI_windows_portable\ComfyUI\models\checkpoints\
   your_model.safetensors    ← place it here
 ```
 
-**Where to download:**
-
-| Source | URL |
-|--------|-----|
-| HuggingFace | https://huggingface.co/models |
-| CivitAI | https://civitai.com |
-
-Recommended starting models:
+Download from [HuggingFace](https://huggingface.co/models) or [CivitAI](https://civitai.com).
 
 | Model | Size | Link |
 |-------|------|------|
@@ -244,10 +252,9 @@ Recommended starting models:
 | SDXL Base 1.0 | ~7 GB | https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0 |
 | Flux.1 Dev | ~24 GB | https://huggingface.co/black-forest-labs/FLUX.1-dev |
 
-**After downloading:**
-1. Place the `.safetensors` file in `ComfyUI_windows_portable\ComfyUI\models\checkpoints\`
-2. Restart ComfyUI (or click **Refresh** in the model list).
-3. Open workflow 07, click `CheckpointLoaderSimple`, select your model.
+After placing the file: restart ComfyUI → click `CheckpointLoaderSimple` → select your model.
+
+→ Full model guide: [docs/models.md](../docs/models.md)
 
 ---
 
@@ -255,13 +262,13 @@ Recommended starting models:
 
 | Workflow | Nodes needed | Models needed |
 |----------|-------------|---------------|
-| `01_quick_4x_upscale` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
-| `02_before_after_preview` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
-| `03_2x_vs_4x_comparison` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
-| `04_denoise_then_upscale` | `rtx_vsr_single_frame_node` + `Nvidia_RTX_Nodes_ComfyUI` | NVIDIA VSR SDK |
-| `05_video_frame_sampler` | `rtx_vsr_single_frame_node` + `ComfyUI-VideoHelperSuite` | NVIDIA VSR SDK |
-| `06_upscale_then_crop` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
-| `07_ai_gen_image_enhance` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK + SD checkpoint |
+| `01_quick_4x_upscale` | `rtx_vsr_single_frame_node` | `ComfyUI\models\nvidia_vsr\` |
+| `02_before_after_preview` | `rtx_vsr_single_frame_node` | `ComfyUI\models\nvidia_vsr\` |
+| `03_2x_vs_4x_comparison` | `rtx_vsr_single_frame_node` | `ComfyUI\models\nvidia_vsr\` |
+| `04_denoise_then_upscale` | `rtx_vsr_single_frame_node` + `Nvidia_RTX_Nodes_ComfyUI` | `ComfyUI\models\nvidia_vsr\` |
+| `05_video_frame_sampler` | `rtx_vsr_single_frame_node` + `ComfyUI-VideoHelperSuite` | `ComfyUI\models\nvidia_vsr\` |
+| `06_upscale_then_crop` | `rtx_vsr_single_frame_node` | `ComfyUI\models\nvidia_vsr\` |
+| `07_ai_gen_image_enhance` | `rtx_vsr_single_frame_node` | `ComfyUI\models\nvidia_vsr\` + SD checkpoint |
 
 ---
 

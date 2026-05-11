@@ -94,15 +94,36 @@ Run from this project's root — detects ComfyUI and does all the steps above:
 The nodes need the NVIDIA Video Effects SDK model files to run.
 **These are separate from `nvidia-vfx` and must be downloaded once.**
 
-1. Download the SDK installer: **https://developer.nvidia.com/rtx-video-sdk**
-2. Run the installer — model files land at:
+All model files live **inside your ComfyUI folder** — nothing in Program Files:
+
+```
+ComfyUI_windows_portable\ComfyUI\models\
+  nvidia_vsr\              ← NVIDIA VSR model files go here
+    SuperRes_CG_2x.nvmdl
+    SuperRes_CG_4x.nvmdl
+```
+
+**Steps:**
+
+1. Download the SDK: **https://developer.nvidia.com/rtx-video-sdk**
+2. Run the installer — models land at `C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\`
+3. Copy them into ComfyUI:
+   ```powershell
+   Copy-Item `
+     "C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\*" `
+     "ComfyUI_windows_portable\ComfyUI\models\nvidia_vsr\" `
+     -Recurse
    ```
-   C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
-   ```
-3. Verify everything is ready:
+4. Verify:
    ```powershell
    python scripts\check_environment.py
    ```
+   Look for: `[PASS] NVVFX model directory`
+
+The node checks `ComfyUI\models\nvidia_vsr\` first — if models are there,
+the Program Files path is never used.
+
+→ Full model guide: [docs/models.md](docs/models.md)
 
 ---
 

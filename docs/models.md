@@ -1,153 +1,132 @@
 # Model Files Guide
 
-This toolkit uses two categories of models:
-
-1. **NVIDIA RTX VSR models** — required by the `nvidia-vfx` SDK for all upscaling.
-2. **Stable Diffusion checkpoint** — required only for workflow 07 (AI generation + VSR).
+Everything stays inside your ComfyUI installation.
+No need to touch system directories or Program Files.
 
 ---
 
-## 1. NVIDIA RTX VSR Models
+## NVIDIA RTX VSR Model Files
 
-### How the models are distributed
+### Where they go
 
-The NVIDIA Video Effects SDK ships its neural network model files as part of
-the SDK installation. They are **not** inside `nvidia-vfx` itself — they are
-installed separately, either:
+```
+ComfyUI_windows_portable\
+  ComfyUI\
+    models\
+      nvidia_vsr\          ← place the NVIDIA VSR model files here
+        SuperRes_CG_2x.nvmdl
+        SuperRes_CG_4x.nvmdl
+        (other .nvmdl / .bin files from the SDK)
+```
 
-- **Automatically** when the NVIDIA driver is installed (some versions include them).
-- **Manually** by downloading and extracting the NVIDIA Video Effects SDK.
+Our custom node registers `nvidia_vsr` as a model type inside ComfyUI
+and looks there first — before checking any system path.
 
-### Where the models live on disk
+---
 
-Default path on Windows:
+### How to get the model files
+
+**Step 1 — Download the NVIDIA Video Effects SDK:**
+```
+https://developer.nvidia.com/rtx-video-sdk
+```
+
+**Step 2 — Run the installer.**
+The installer places the model files at:
 ```
 C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
 ```
 
-The SDK looks for this path at runtime. If the models are missing, `vsr.load()`
-will raise a `RuntimeError` with a message about missing model files.
+**Step 3 — Copy the model files into ComfyUI:**
+```powershell
+Copy-Item `
+  "C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\*" `
+  "ComfyUI_windows_portable\ComfyUI\models\nvidia_vsr\" `
+  -Recurse
+```
 
-### How to get the models
+Or copy manually — open the folder and drag the files across.
 
-**Option A — NVIDIA Video Effects SDK download (recommended)**
+**Step 4 — Verify:**
+```powershell
+python scripts\check_environment.py
+```
+Look for: `[PASS] NVVFX model directory`
 
-1. Go to: https://developer.nvidia.com/rtx-video-sdk
-2. Click **Download SDK**.
-3. Run the installer — it places the model files in the default path above.
-4. No further action needed; `nvidia-vfx` finds them automatically.
+---
 
-**Option B — Set a custom model path via environment variable**
+### How the node finds the models
 
-If your models are in a different location, set `NVVFX_SDK_PATH` before
-running any script or launching ComfyUI:
+The node checks these locations in order and uses the first one that
+contains model files:
+
+| Priority | Path | When to use |
+|----------|------|-------------|
+| 1st | `ComfyUI\models\nvidia_vsr\` | Recommended — everything in ComfyUI |
+| 2nd | `NVVFX_SDK_PATH` env var | Custom/override path |
+| 3rd | `C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\` | SDK default fallback |
+
+If models are found in `ComfyUI\models\nvidia_vsr\`, the node uses them
+directly and the Program Files path is never touched.
+
+---
+
+### Custom model path (optional)
+
+If you keep your models somewhere else, set the environment variable
+before launching ComfyUI:
 
 ```powershell
-# PowerShell — set for the current session
-$env:NVVFX_SDK_PATH = "D:\NvVFX\models"
-
-# Or set it permanently in Windows system environment variables
-[System.Environment]::SetEnvironmentVariable("NVVFX_SDK_PATH", "D:\NvVFX\models", "User")
+$env:NVVFX_SDK_PATH = "D:\MyModels\nvidia_vsr"
 ```
-
-Then pass the path in Python if the API requires it:
-```python
-import os
-import nvvfx
-
-vsr = nvvfx.VideoSuperRes()
-# Some builds accept a model_dir parameter:
-# vsr.model_dir = os.environ.get("NVVFX_SDK_PATH", r"C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models")
-vsr.load()
-```
-
-**Option C — Auto-download on first `load()` call**
-
-Some builds of `nvidia-vfx` automatically download the model files the first
-time `vsr.load()` is called. This requires an internet connection. A progress
-message is printed to the console. If download fails, you will see a
-`RuntimeError` — fall back to Option A.
-
-### Verifying the models are present
-
-```powershell
-python scripts/check_environment.py
-```
-
-The environment check reports whether the NVVFX model directory is found.
 
 ---
 
-## 2. Stable Diffusion Checkpoint (workflow 07 only)
+## Stable Diffusion Checkpoint (workflow 07 only)
 
-Workflow `07_ai_gen_image_enhance.json` uses a standard ComfyUI KSampler to
-generate an image before passing it to RTX VSR. It requires a Stable Diffusion
-checkpoint model.
+Workflow `07_ai_gen_image_enhance.json` uses a KSampler node and requires
+a Stable Diffusion checkpoint.
 
-### Where to place it
-
+**Where it goes:**
 ```
-ComfyUI\
-  models\
-    checkpoints\       ← place your .safetensors or .ckpt file here
-      my_model.safetensors
+ComfyUI_windows_portable\
+  ComfyUI\
+    models\
+      checkpoints\
+        your_model.safetensors    ← place it here
 ```
 
-### Where to download checkpoints
+**Where to download:**
 
-| Source | URL | Notes |
-|--------|-----|-------|
-| HuggingFace | https://huggingface.co/models | Filter by "text-to-image" |
-| CivitAI | https://civitai.com | Large community model library |
-| Stability AI | https://stability.ai/stable-image | Official SD models |
+| Source | URL |
+|--------|-----|
+| HuggingFace | https://huggingface.co/models |
+| CivitAI | https://civitai.com |
 
-**Recommended starting points:**
+Recommended models:
 
-| Model | Type | Size | Download |
-|-------|------|------|---------|
-| SD 1.5 (pruned) | SD 1.5 | ~4 GB | [HuggingFace](https://huggingface.co/runwayml/stable-diffusion-v1-5) |
-| SDXL Base 1.0 | SDXL | ~7 GB | [HuggingFace](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) |
-| Flux.1 Dev | Flux | ~24 GB | [HuggingFace](https://huggingface.co/black-forest-labs/FLUX.1-dev) |
+| Model | Size | Link |
+|-------|------|------|
+| SD 1.5 pruned emaonly | ~4 GB | https://huggingface.co/runwayml/stable-diffusion-v1-5 |
+| SDXL Base 1.0 | ~7 GB | https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0 |
+| Flux.1 Dev | ~24 GB | https://huggingface.co/black-forest-labs/FLUX.1-dev |
 
-### Connecting the model in workflow 07
-
-After placing the file in `ComfyUI/models/checkpoints/`:
-
-1. Open `07_ai_gen_image_enhance.json` in ComfyUI.
-2. Click the `CheckpointLoaderSimple` node.
-3. In the dropdown, select your model filename.
-4. Queue Prompt.
+**After downloading:**
+1. Restart ComfyUI (or refresh model list).
+2. Open workflow 07, click `CheckpointLoaderSimple`, select your model.
 
 ---
 
-## Model directory structure (complete reference)
+## Complete models folder structure
 
 ```
-ComfyUI\
-  models\
-    checkpoints\           ← SD / SDXL / Flux models (workflow 07)
-    clip\                  ← CLIP text encoders (auto-loaded by checkpoint)
-    vae\                   ← VAE models (optional override)
-    upscale_models\        ← ESRGAN / 4x models (not used by RTX VSR)
-
-C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\
-  models\                  ← NVIDIA RTX VSR model files (auto-detected)
-    SuperRes_CG_2x.nvmdl   ← 2x super resolution model (example filename)
-    SuperRes_CG_4x.nvmdl   ← 4x super resolution model (example filename)
+ComfyUI_windows_portable\ComfyUI\models\
+  nvidia_vsr\               ← NVIDIA RTX VSR model files (all workflows)
+    SuperRes_CG_2x.nvmdl
+    SuperRes_CG_4x.nvmdl
+  checkpoints\              ← SD / SDXL / Flux (workflow 07 only)
+    your_model.safetensors
+  vae\                      ← optional VAE override
+  loras\                    ← LoRA files
+  upscale_models\           ← ESRGAN models (not used by RTX VSR)
 ```
-
-> **Note:** The exact NVIDIA model filenames depend on the SDK version installed.
-> You do not need to know the filenames — `nvvfx` finds them automatically
-> from the SDK path.
-
----
-
-## Troubleshooting model issues
-
-| Symptom | Fix |
-|---------|-----|
-| `RuntimeError: model file not found` | Download the NVIDIA Video Effects SDK from https://developer.nvidia.com/rtx-video-sdk |
-| `RuntimeError: NVVFX_SDK_PATH not set` | Set `NVVFX_SDK_PATH` to the folder containing the model files |
-| Checkpoint not visible in ComfyUI dropdown | Refresh the model list or restart ComfyUI; confirm file is in `models/checkpoints/` |
-| `load()` hangs on first run | Models may be downloading; wait for completion and check console |
-| Wrong model filename in workflow 07 | Click `CheckpointLoaderSimple` and select the correct file from the dropdown |
