@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "nvidia-rtx-vsr-comfyui-toolkit"
+version = "0.1.0"
+description = "Proof-of-concept toolkit for NVIDIA RTX Video Super Resolution: video upscaling, still-image enhancement, and ComfyUI integration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "amortegui84" }
+]
+keywords = ["nvidia", "rtx", "vsr", "super-resolution", "upscaling", "comfyui", "video-ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.1.0",
+    "torchvision>=0.16.0",
+    "numpy>=1.24.0",
+    "Pillow>=10.0.0",
+    "opencv-python>=4.8.0",
+    "tqdm>=4.65.0",
+    "ffmpeg-python>=0.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/amortegui84/nvidia-rtx-vsr-comfyui-toolkit"
+Issues = "https://github.com/amortegui84/nvidia-rtx-vsr-comfyui-toolkit/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scripts*", "comfyui*"]

@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv
+env/
+venv/
+ENV/
+*.pth
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Inputs/Outputs (large media files — track structure only)
+inputs/videos/*
+inputs/images/*
+inputs/frames/*
+outputs/videos/*
+outputs/images/*
+outputs/frames/*
+outputs/benchmarks/*
+
+# Keep directory structure
+!inputs/videos/.gitkeep
+!inputs/images/.gitkeep
+!inputs/frames/.gitkeep
+!outputs/videos/.gitkeep
+!outputs/images/.gitkeep
+!outputs/frames/.gitkeep
+!outputs/benchmarks/.gitkeep
+
+# NVIDIA model cache
+*.nvvfx_models/
+models/
+
+# Logs
+*.log
+logs/
+
+# Temp frame directories
+/tmp_frames_*/

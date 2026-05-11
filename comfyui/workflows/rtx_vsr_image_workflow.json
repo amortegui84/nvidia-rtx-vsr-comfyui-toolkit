@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "RTX VSR Image Upscale Workflow",
+    "",
+    "Uses our custom 'RTX VSR Single Frame Upscale' node from:",
+    "  comfyui/custom_nodes/rtx_vsr_single_frame_node/",
+    "",
+    "SETUP STEPS:",
+    "  1. Copy rtx_vsr_single_frame_node/ into ComfyUI/custom_nodes/",
+    "  2. Install nvidia-vfx:",
+    "       pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com",
+    "  3. Restart ComfyUI.",
+    "  4. Load this workflow JSON in ComfyUI.",
+    "",
+    "NODE CHAIN:",
+    "  [Load Image] ──► [RTX VSR Single Frame Upscale] ──► [Save Image]",
+    "                            │",
+    "                      scale_factor: 4x"
+  ],
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [100, 200],
+      "size": {"0": 315, "1": 130},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1], "slot_index": 0},
+        {"name": "MASK",  "type": "MASK",  "links": [], "slot_index": 1}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_image.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "RTXVSRSingleFrameNode",
+      "_note": "Our custom node — must be installed in custom_nodes/rtx_vsr_single_frame_node/",
+      "pos": [500, 200],
+      "size": {"0": 315, "1": 100},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [2], "slot_index": 0}
+      ],
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 3,
+      "type": "SaveImage",
+      "pos": [900, 200],
+      "size": {"0": 315, "1": 130},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 2}
+      ],
+      "widgets_values": ["rtx_vsr_output"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 3, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 1.0, "offset": [0, 0]}
+  },
+  "version": 0.4
+}

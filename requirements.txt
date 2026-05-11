@@ -1,0 +1,20 @@
+# Core dependencies
+torch>=2.1.0
+torchvision>=0.16.0
+numpy>=1.24.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+tqdm>=4.65.0
+ffmpeg-python>=0.2.0
+
+# nvidia-vfx must be installed separately from NVIDIA's index.
+# Do NOT add it here as it is not on the standard PyPI index.
+#
+# Install with:
+#   pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
+#
+# If that fails:
+#   python -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
+
+# Optional: CuPy for direct GPU array interop (install matching your CUDA version)
+# cupy-cuda12x>=12.0.0   # for CUDA 12.x

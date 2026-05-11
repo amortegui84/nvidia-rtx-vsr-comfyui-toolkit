@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "RTX VSR Video Upscale Workflow",
+    "",
+    "This is a PLACEHOLDER workflow for the official NVIDIA RTX Nodes for ComfyUI.",
+    "The official node repo is: https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI",
+    "",
+    "SETUP STEPS:",
+    "  1. Clone the official repo into ComfyUI/custom_nodes/:",
+    "       git clone https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI",
+    "          ComfyUI/custom_nodes/Nvidia_RTX_Nodes_ComfyUI",
+    "  2. Restart ComfyUI.",
+    "  3. Look for nodes in the 'NVIDIA RTX' category in the node browser.",
+    "  4. The 'RTX Video Super Resolution' node accepts a video path or frames.",
+    "  5. Connect: Load Video → RTX VSR → Save Video.",
+    "",
+    "MANUAL WIRING REQUIRED:",
+    "  This JSON cannot include real node IDs without running ComfyUI.",
+    "  Open ComfyUI, add nodes manually, and save your own workflow JSON.",
+    "",
+    "EXPECTED NODE CHAIN:",
+    "  [Load Video] ──► [RTX Video Super Resolution] ──► [Save Video]",
+    "                         │",
+    "                   scale_factor: 4x",
+    "                   output_path: outputs/videos/"
+  ],
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadVideo",
+      "pos": [100, 200],
+      "size": {"0": 315, "1": 130},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "VIDEO", "type": "VIDEO", "links": [1], "slot_index": 0}
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": ["inputs/videos/test_video.mp4"]
+    },
+    {
+      "id": 2,
+      "type": "RTXVideoSuperResolution",
+      "_note": "This node requires NVIDIA RTX Nodes for ComfyUI to be installed.",
+      "pos": [500, 200],
+      "size": {"0": 315, "1": 160},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "video", "type": "VIDEO", "link": 1}
+      ],
+      "outputs": [
+        {"name": "VIDEO", "type": "VIDEO", "links": [2], "slot_index": 0}
+      ],
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 3,
+      "type": "SaveVideo",
+      "pos": [900, 200],
+      "size": {"0": 315, "1": 130},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "video", "type": "VIDEO", "link": 2}
+      ],
+      "widgets_values": ["outputs/videos/rtx_vsr_output"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "VIDEO"],
+    [2, 2, 0, 3, 0, "VIDEO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 1.0, "offset": [0, 0]}
+  },
+  "version": 0.4
+}
