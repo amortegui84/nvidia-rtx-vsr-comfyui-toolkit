@@ -8,30 +8,105 @@ Supports video upscaling, still images, and individual AI-generated frames.
 
 ## Quick Start — ComfyUI
 
-### 1. Install the nodes (one command)
+### 1. Install the nodes
 
-**Windows (PowerShell) — run from the project root:**
+All nodes go inside your ComfyUI `custom_nodes` folder.
+With the **Windows portable** this is:
+
+```
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
+```
+
+---
+
+#### Option A — ComfyUI Manager (easiest, no terminal needed)
+
+1. Launch ComfyUI.
+2. Click **Manager** in the top menu.
+3. Click **Install Custom Nodes**.
+4. Search **`RTX`** → install **Nvidia RTX Nodes**.
+5. Search **`VHS`** → install **ComfyUI-VideoHelperSuite**.
+6. Restart ComfyUI.
+
+Then copy our custom node manually (see Option B, step 3 only).
+
+---
+
+#### Option B — Manual git clone
+
+Open PowerShell and navigate to your `custom_nodes` folder:
+
+```powershell
+cd ComfyUI_windows_portable\ComfyUI\custom_nodes
+```
+
+**Clone the official NVIDIA RTX nodes:**
+```powershell
+git clone https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git
+..\..\..\python_embeded\python.exe -m pip install -r Nvidia_RTX_Nodes_ComfyUI\requirements.txt
+```
+
+**Clone ComfyUI-VideoHelperSuite (for video workflows):**
+```powershell
+git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+..\..\..\python_embeded\python.exe -m pip install -r ComfyUI-VideoHelperSuite\requirements.txt
+```
+
+**Copy our custom RTX VSR Single Frame node** (run from this project's root):
+```powershell
+Copy-Item -Recurse `
+  ".\comfyui\custom_nodes\rtx_vsr_single_frame_node" `
+  "ComfyUI_windows_portable\ComfyUI\custom_nodes\rtx_vsr_single_frame_node"
+```
+
+**Install nvidia-vfx:**
+```powershell
+ComfyUI_windows_portable\python_embeded\python.exe -m pip install `
+  -U --no-build-isolation nvidia-vfx `
+  --index-url https://pypi.nvidia.com
+```
+
+After all steps, `custom_nodes` should look like this:
+
+```
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
+  Nvidia_RTX_Nodes_ComfyUI\          ← official NVIDIA RTX nodes
+  ComfyUI-VideoHelperSuite\          ← video load / save
+  rtx_vsr_single_frame_node\         ← our custom node (single image upscale)
+```
+
+---
+
+#### Option C — Automatic installer script
+
+Run from this project's root — detects ComfyUI and does all the steps above:
+
 ```powershell
 .\comfyui\install_nodes.ps1
 ```
 
-**Linux / macOS:**
-```bash
-bash comfyui/install_nodes.sh
-```
-
-The script does everything automatically:
-- Detects your ComfyUI installation
-- Clones the official NVIDIA RTX nodes
-- Clones ComfyUI-VideoHelperSuite (for video workflows)
-- Copies our custom `RTX VSR Single Frame` node
-- Installs `nvidia-vfx`
-
-→ Full node guide: [comfyui/NODES.md](comfyui/NODES.md)
+→ Full node guide with troubleshooting: [comfyui/NODES.md](comfyui/NODES.md)
 
 ---
 
-### 2. Restart ComfyUI
+### 2. Download the NVIDIA RTX VSR model files
+
+The nodes need the NVIDIA Video Effects SDK model files to run.
+**These are separate from `nvidia-vfx` and must be downloaded once.**
+
+1. Download the SDK installer: **https://developer.nvidia.com/rtx-video-sdk**
+2. Run the installer — model files land at:
+   ```
+   C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
+   ```
+3. Verify everything is ready:
+   ```powershell
+   python scripts\check_environment.py
+   ```
+
+---
+
+### 3. Restart ComfyUI
 
 After installing nodes, restart ComfyUI completely.
 
