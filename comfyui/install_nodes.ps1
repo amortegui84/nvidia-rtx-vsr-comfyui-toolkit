@@ -31,12 +31,17 @@ Write-Host ""
 Write-Step "Locating ComfyUI installation"
 
 $commonPaths = @(
+    # Windows portable (most common)
+    "C:\ComfyUI_windows_portable\ComfyUI",
+    "D:\ComfyUI_windows_portable\ComfyUI",
+    "E:\ComfyUI_windows_portable\ComfyUI",
+    "$env:USERPROFILE\Desktop\ComfyUI_windows_portable\ComfyUI",
+    "$env:USERPROFILE\Downloads\ComfyUI_windows_portable\ComfyUI",
+    # Standalone installs
     "C:\ComfyUI",
-    "C:\Users\$env:USERNAME\ComfyUI",
-    "C:\Users\$env:USERNAME\Desktop\ComfyUI",
-    "C:\Users\$env:USERNAME\Documents\ComfyUI",
     "D:\ComfyUI",
-    "E:\ComfyUI"
+    "C:\Users\$env:USERNAME\ComfyUI",
+    "C:\Users\$env:USERNAME\Desktop\ComfyUI"
 )
 
 if ($ComfyUIPath -eq "") {
@@ -62,6 +67,19 @@ if ($ComfyUIPath -eq "" -or !(Test-Path "$ComfyUIPath\custom_nodes")) {
 $customNodes = "$ComfyUIPath\custom_nodes"
 Write-Info "custom_nodes path: $customNodes"
 
+# ── Detect Python (embedded portable vs system) ───────────────────────────────
+$embeddedPython = "$ComfyUIPath\..\python_embeded\python.exe"
+if (Test-Path $embeddedPython) {
+    $PythonExe = (Resolve-Path $embeddedPython).Path
+    Write-Pass "Embedded Python found: $PythonExe"
+} elseif (Get-Command python -ErrorAction SilentlyContinue) {
+    $PythonExe = "python"
+    Write-Pass "System Python: $(python --version)"
+} else {
+    Write-Fail "Python not found. Install Python or use the ComfyUI Windows portable."
+    exit 1
+}
+
 # ── Check dependencies ────────────────────────────────────────────────────────
 Write-Step "Checking dependencies"
 
@@ -71,12 +89,12 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) {
     exit 1
 }
 Write-Pass "git: $(git --version)"
+Write-Info "Python: $PythonExe"
 
-if (!(Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Fail "python not found in PATH."
-    exit 1
-}
-Write-Pass "python: $(python --version)"
+Write-Host ""
+Write-Warn "NOTE: For official nodes (NVIDIA RTX, VHS), you can also use"
+Write-Warn "      ComfyUI Manager inside ComfyUI — search 'RTX' or 'VHS'."
+Write-Host "      This script installs via git clone as an alternative." -ForegroundColor Gray
 
 # ── Clone or update a repo ────────────────────────────────────────────────────
 function Install-Node {
@@ -109,7 +127,7 @@ function Install-Node {
 
     if ($RequirementsTxt -ne "" -and (Test-Path "$destPath\$RequirementsTxt")) {
         Write-Info "Installing requirements ($RequirementsTxt)..."
-        python -m pip install -r "$destPath\$RequirementsTxt" --quiet
+        & $PythonExe -m pip install -r "$destPath\$RequirementsTxt" --quiet
         Write-Pass "Requirements installed."
     }
 }
@@ -172,20 +190,20 @@ Install-LocalNode `
 # ── Install nvidia-vfx ────────────────────────────────────────────────────────
 Write-Step "Installing nvidia-vfx"
 
-$nvvfxCheck = python -c "import nvvfx; print('ok')" 2>&1
+$nvvfxCheck = & $PythonExe -c "import nvvfx; print('ok')" 2>&1
 if ($nvvfxCheck -eq "ok") {
     Write-Pass "nvidia-vfx is already installed."
 } else {
     Write-Info "Installing nvidia-vfx from pypi.nvidia.com ..."
-    python -m pip install -U --no-build-isolation nvidia-vfx `
+    & $PythonExe -m pip install -U --no-build-isolation nvidia-vfx `
         --index-url https://pypi.nvidia.com 2>&1 | ForEach-Object { Write-Host "  $_" }
 
-    $nvvfxCheck2 = python -c "import nvvfx; print('ok')" 2>&1
+    $nvvfxCheck2 = & $PythonExe -c "import nvvfx; print('ok')" 2>&1
     if ($nvvfxCheck2 -eq "ok") {
         Write-Pass "nvidia-vfx installed successfully."
     } else {
         Write-Warn "Could not verify nvidia-vfx. Try manually:"
-        Write-Host "  python -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com"
+        Write-Host "  $PythonExe -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com"
     }
 }
 
@@ -195,12 +213,18 @@ Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "  Installation complete" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Nodes installed in: $customNodes" -ForegroundColor White
+Write-Host "Nodes installed in:" -ForegroundColor White
+Write-Host "  $customNodes" -ForegroundColor White
 Write-Host ""
 Write-Host "  Nvidia_RTX_Nodes_ComfyUI\     (official NVIDIA nodes)" -ForegroundColor Green
 Write-Host "  ComfyUI-VideoHelperSuite\     (load / save video)" -ForegroundColor Green
 Write-Host "  rtx_vsr_single_frame_node\    (our custom node)" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next step: restart ComfyUI and search for:" -ForegroundColor Yellow
-Write-Host "  NVIDIA RTX / Super Resolution -> RTX VSR Single Frame Upscale" -ForegroundColor Yellow
+Write-Host "NVIDIA VSR model files — still need to be downloaded separately:" -ForegroundColor Yellow
+Write-Host "  https://developer.nvidia.com/rtx-video-sdk" -ForegroundColor Yellow
+Write-Host "  Installer places models at:" -ForegroundColor Yellow
+Write-Host "  C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Next step: restart ComfyUI and search for:" -ForegroundColor Cyan
+Write-Host "  NVIDIA RTX / Super Resolution -> RTX VSR Single Frame Upscale" -ForegroundColor Cyan
 Write-Host ""

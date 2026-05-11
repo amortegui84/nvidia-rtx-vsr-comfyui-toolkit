@@ -2,274 +2,230 @@
 
 ---
 
-## How ComfyUI nodes work
+## How ComfyUI loads nodes
 
-ComfyUI loads nodes from a specific folder inside **your ComfyUI installation**:
+ComfyUI loads every subfolder inside its `custom_nodes` directory at startup.
 
+**Windows portable path** (most common setup):
 ```
-C:\ComfyUI\
-  custom_nodes\        ← ComfyUI reads every folder here at startup
-    some_node\
-    another_node\
-  models\
-  output\
-  main.py
+ComfyUI_windows_portable\
+  ComfyUI\
+    custom_nodes\    ← all nodes go here
+    models\
+      checkpoints\
+      vae\
+      loras\
+    output\
+    main.py
+  python_embeded\
+  run_nvidia_gpu.bat
 ```
 
-To install a node you either:
-- **`git clone` a repository** directly into `C:\ComfyUI\custom_nodes\`
-- **Copy a folder** into `C:\ComfyUI\custom_nodes\`
-
-**This project** (`nvidia-rtx-vsr-comfyui-toolkit`) is separate from ComfyUI.
-It contains the source code for our custom node and the install scripts.
-It is **not** where ComfyUI loads nodes from.
-
-```
-nvidia-rtx-vsr-comfyui-toolkit\     ← THIS project (source code)
-  comfyui\
-    custom_nodes\
-      rtx_vsr_single_frame_node\    ← source of our node (not loaded by ComfyUI)
-    install_nodes.ps1               ← copies/clones everything into real ComfyUI
-
-C:\ComfyUI\                         ← your REAL ComfyUI installation
-  custom_nodes\
-    rtx_vsr_single_frame_node\      ← copied here by the installer
-    Nvidia_RTX_Nodes_ComfyUI\       ← cloned here by the installer
-    ComfyUI-VideoHelperSuite\       ← cloned here by the installer
-```
+There are two ways to install a node:
+1. **ComfyUI Manager** — the built-in GUI installer (recommended for official nodes)
+2. **Manual git clone** — paste a command, node is ready immediately
 
 ---
 
-## Automatic installation (recommended)
+## Method 1 — ComfyUI Manager (recommended for official nodes)
 
-Run this from the root of this project. It does everything below automatically.
+ComfyUI Manager is bundled with ComfyUI. It lets you search, install, and
+update nodes without touching the terminal.
 
-**Windows:**
-```powershell
-.\comfyui\install_nodes.ps1
-```
+### Install NVIDIA RTX Nodes via Manager
 
-**Linux / macOS:**
-```bash
-bash comfyui/install_nodes.sh
-```
+1. Launch ComfyUI.
+2. Click **Manager** in the top menu bar.
+3. Click **Install Custom Nodes**.
+4. Search: `RTX`
+5. Find **Nvidia RTX Nodes** → click **Install**.
+6. Restart ComfyUI when prompted.
 
-The script:
-1. Finds your ComfyUI installation (or asks you for the path)
-2. Clones `Nvidia_RTX_Nodes_ComfyUI` into `C:\ComfyUI\custom_nodes\`
-3. Clones `ComfyUI-VideoHelperSuite` into `C:\ComfyUI\custom_nodes\`
-4. Copies `rtx_vsr_single_frame_node` into `C:\ComfyUI\custom_nodes\`
-5. Installs `nvidia-vfx`
+### Install ComfyUI-VideoHelperSuite via Manager
 
----
+1. Open Manager → **Install Custom Nodes**.
+2. Search: `VideoHelperSuite` or `VHS`.
+3. Click **Install** → restart ComfyUI.
 
-## Manual installation — step by step
-
-### Step 1 — Find your ComfyUI `custom_nodes` folder
-
-Open your ComfyUI installation folder. You should see a `custom_nodes` subfolder:
-
-```
-C:\ComfyUI\custom_nodes\
-```
-
-Common locations:
-```
-C:\ComfyUI\custom_nodes\
-C:\Users\YourName\ComfyUI\custom_nodes\
-D:\ComfyUI\custom_nodes\
-```
-
-All `git clone` commands below go **inside this folder**.
+> If ComfyUI Manager is not available, install it first:
+> ```powershell
+> cd ComfyUI_windows_portable\ComfyUI\custom_nodes
+> git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+> ```
+> Then restart ComfyUI.
 
 ---
 
-### Step 2 — Install NVIDIA RTX Nodes (official)
+## Method 2 — Manual git clone
 
-This is the official NVIDIA node package published by Comfy-Org.
+Open a terminal and navigate to your `custom_nodes` folder first:
 
 ```powershell
-cd C:\ComfyUI\custom_nodes
+cd ComfyUI_windows_portable\ComfyUI\custom_nodes
+```
 
+### Clone NVIDIA RTX Nodes
+
+```powershell
 git clone https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git
+```
 
-cd Nvidia_RTX_Nodes_ComfyUI
-pip install -r requirements.txt
+Install its requirements using the **embedded Python** that comes with the portable:
+
+```powershell
+..\..\..\python_embeded\python.exe -m pip install -r Nvidia_RTX_Nodes_ComfyUI\requirements.txt
 ```
 
 Result:
 ```
-C:\ComfyUI\custom_nodes\
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
   Nvidia_RTX_Nodes_ComfyUI\    ← cloned here
     __init__.py
     requirements.txt
     nodes\
 ```
 
-Nodes it adds to ComfyUI:
-- `RTX Video Super Resolution` — upscales video
-- `RTX Denoise` — removes noise before upscaling
-- `RTX Artifact Reduction` — reduces compression artifacts
-
-Where they appear in ComfyUI:
-> Double-click canvas → search `RTX` → category **NVIDIA RTX**
-
 ---
 
-### Step 3 — Install ComfyUI-VideoHelperSuite (VHS)
-
-Required for any workflow that loads or exports video.
+### Clone ComfyUI-VideoHelperSuite
 
 ```powershell
-cd C:\ComfyUI\custom_nodes
-
 git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+```
 
-cd ComfyUI-VideoHelperSuite
-pip install -r requirements.txt
+```powershell
+..\..\..\python_embeded\python.exe -m pip install -r ComfyUI-VideoHelperSuite\requirements.txt
 ```
 
 Result:
 ```
-C:\ComfyUI\custom_nodes\
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
   ComfyUI-VideoHelperSuite\    ← cloned here
     __init__.py
     requirements.txt
 ```
 
-Nodes it adds:
-- `VHS_LoadVideo` — loads a video file, outputs IMAGE batch
-- `VHS_VideoCombine` — saves IMAGE batch back to video
-
 ---
 
-### Step 4 — Install our custom node: RTX VSR Single Frame
+### Install our custom node: RTX VSR Single Frame
 
-This node lives in **this project** under `comfyui/custom_nodes/rtx_vsr_single_frame_node/`.
-It needs to be **copied** into your ComfyUI `custom_nodes` folder.
+This node is included in this project under `comfyui/custom_nodes/rtx_vsr_single_frame_node/`.
+Copy it into your ComfyUI `custom_nodes` folder:
 
 ```powershell
 # Run from the root of this project
 Copy-Item -Recurse `
   ".\comfyui\custom_nodes\rtx_vsr_single_frame_node" `
-  "C:\ComfyUI\custom_nodes\rtx_vsr_single_frame_node"
+  "ComfyUI_windows_portable\ComfyUI\custom_nodes\rtx_vsr_single_frame_node"
 ```
 
 Result:
 ```
-C:\ComfyUI\custom_nodes\
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
   rtx_vsr_single_frame_node\    ← copied here
     __init__.py
     rtx_vsr_single_frame_node.py
     README.md
 ```
 
-Node it adds:
-- `RTX VSR Single Frame Upscale` — upscales a single image or frame
-
-Where it appears in ComfyUI:
-> Double-click canvas → search `RTX VSR` → category **NVIDIA RTX / Super Resolution**
-
-Input / Output:
-
-| Port | Type | Description |
-|------|------|-------------|
-| `image` (input) | IMAGE | Any ComfyUI image — photo, render, KSampler output |
-| `scale_factor` | Widget | `4x` or `2x` |
-| `upscaled_image` (output) | IMAGE | Upscaled result at the same tensor format |
+> **Note:** This node is not on ComfyUI Manager. It must be copied manually
+> or installed via the `install_nodes.ps1` script.
 
 ---
 
-### Step 5 — Install nvidia-vfx
+### Install nvidia-vfx
 
-This is the Python package that provides the RTX VSR engine.
-It must be installed in the same Python environment that runs ComfyUI.
+Install into the **embedded Python** that comes with the ComfyUI portable:
 
 ```powershell
-pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
-```
-
-If that fails:
-```powershell
-python -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
+ComfyUI_windows_portable\python_embeded\python.exe -m pip install `
+  -U --no-build-isolation nvidia-vfx `
+  --index-url https://pypi.nvidia.com
 ```
 
 Verify:
 ```powershell
-python -c "import nvvfx; print('OK')"
+ComfyUI_windows_portable\python_embeded\python.exe -c "import nvvfx; print('OK')"
 ```
 
 ---
 
-### Step 6 — Download the NVIDIA RTX VSR model files
+## After installation — restart ComfyUI
 
-`nvidia-vfx` provides the engine, but **the neural network model files are separate**.
-They are distributed as part of the **NVIDIA Video Effects SDK**.
+Always restart ComfyUI after installing nodes.
+Nodes only load at startup.
 
-**Download the SDK:**
-```
-https://developer.nvidia.com/rtx-video-sdk
-```
-
-Run the installer. The model files are placed automatically at:
-```
-C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
-```
-
-ComfyUI and the Python scripts find them there automatically.
-
-**Custom location:** if you install to a different path, set this before launching ComfyUI:
-```powershell
-$env:NVVFX_SDK_PATH = "D:\NvVFX\models"
-```
-
-**Verify models are found:**
-```powershell
-python scripts/check_environment.py
-```
-Look for: `[PASS] NVVFX model directory`
-
----
-
-### Step 7 — Restart ComfyUI
-
-After installing nodes, **restart ComfyUI completely**. Nodes are only loaded at startup.
-
-If a node appears **red** in the canvas after restarting, it means ComfyUI could
-not import it. Check the ComfyUI terminal for the error message, then see
+If a node appears **red** on the canvas after restarting, ComfyUI could not
+import it. Read the error in the terminal and check
 [docs/troubleshooting.md](../docs/troubleshooting.md).
 
 ---
 
-## Final structure: what `custom_nodes` should look like
+## Final custom_nodes structure
 
 ```
-C:\ComfyUI\custom_nodes\
-  Nvidia_RTX_Nodes_ComfyUI\          ← git clone (Step 2)
-    __init__.py
-    requirements.txt
-    nodes\
-
-  ComfyUI-VideoHelperSuite\          ← git clone (Step 3)
-    __init__.py
-    requirements.txt
-
-  rtx_vsr_single_frame_node\         ← copied from this project (Step 4)
-    __init__.py
-    rtx_vsr_single_frame_node.py
-    README.md
+ComfyUI_windows_portable\ComfyUI\custom_nodes\
+  Nvidia_RTX_Nodes_ComfyUI\          ← via Manager or git clone
+  ComfyUI-VideoHelperSuite\          ← via Manager or git clone
+  rtx_vsr_single_frame_node\         ← copied from this project
 ```
 
 ---
 
-## Stable Diffusion checkpoint (workflow 07 only)
+## Where to find nodes in ComfyUI
 
-Workflow `07_ai_gen_image_enhance.json` generates an image with KSampler
-before passing it to RTX VSR. It needs a Stable Diffusion checkpoint model.
+After installation and restart:
 
-**Where it goes** — inside your ComfyUI installation, NOT this project:
+| Node | Search term | Category |
+|------|-------------|----------|
+| RTX VSR Single Frame Upscale | `RTX VSR` | NVIDIA RTX / Super Resolution |
+| RTX Video Super Resolution | `RTX Video` | NVIDIA RTX |
+| RTX Denoise | `RTX Denoise` | NVIDIA RTX |
+| VHS Load Video | `VHS` or `Load Video` | Video Helper Suite 🎥 |
+| VHS Video Combine | `VHS` or `Video Combine` | Video Helper Suite 🎥 |
+
+---
+
+## Models
+
+### NVIDIA RTX VSR model files
+
+The `nvidia-vfx` Python package provides the engine, but the **neural network
+weights are distributed separately** as part of the NVIDIA Video Effects SDK.
+
+**Step 1 — Download the SDK:**
 ```
-C:\ComfyUI\models\checkpoints\
+https://developer.nvidia.com/rtx-video-sdk
+```
+
+**Step 2 — Run the installer.**
+Model files are placed automatically at:
+```
+C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
+```
+ComfyUI and all scripts in this project find them there automatically.
+
+**Step 3 — Verify:**
+```powershell
+ComfyUI_windows_portable\python_embeded\python.exe scripts\check_environment.py
+```
+Look for: `[PASS] NVVFX model directory`
+
+**Custom model path** — if you installed to a different location:
+```powershell
+$env:NVVFX_SDK_PATH = "D:\NvVFX\models"
+```
+
+---
+
+### Stable Diffusion checkpoint (workflow 07 only)
+
+Workflow `07_ai_gen_image_enhance.json` uses a KSampler to generate an image
+before passing it to RTX VSR. It requires a Stable Diffusion checkpoint.
+
+**Where it goes** — inside your ComfyUI portable installation:
+```
+ComfyUI_windows_portable\ComfyUI\models\checkpoints\
   your_model.safetensors    ← place it here
 ```
 
@@ -284,21 +240,21 @@ Recommended starting models:
 
 | Model | Size | Link |
 |-------|------|------|
-| SD 1.5 (pruned emaonly) | ~4 GB | https://huggingface.co/runwayml/stable-diffusion-v1-5 |
+| SD 1.5 pruned emaonly | ~4 GB | https://huggingface.co/runwayml/stable-diffusion-v1-5 |
 | SDXL Base 1.0 | ~7 GB | https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0 |
 | Flux.1 Dev | ~24 GB | https://huggingface.co/black-forest-labs/FLUX.1-dev |
 
 **After downloading:**
-1. Restart ComfyUI (or refresh model list).
-2. Open workflow 07 and click `CheckpointLoaderSimple`.
-3. Select your model filename from the dropdown.
+1. Place the `.safetensors` file in `ComfyUI_windows_portable\ComfyUI\models\checkpoints\`
+2. Restart ComfyUI (or click **Refresh** in the model list).
+3. Open workflow 07, click `CheckpointLoaderSimple`, select your model.
 
 ---
 
-## Node requirements per workflow
+## Node + model requirements per workflow
 
-| Workflow | Required nodes | Required models |
-|----------|---------------|-----------------|
+| Workflow | Nodes needed | Models needed |
+|----------|-------------|---------------|
 | `01_quick_4x_upscale` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
 | `02_before_after_preview` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
 | `03_2x_vs_4x_comparison` | `rtx_vsr_single_frame_node` | NVIDIA VSR SDK |
@@ -311,28 +267,17 @@ Recommended starting models:
 
 ## Updating nodes
 
+**Via ComfyUI Manager:**
+Open Manager → **Update All** or update each node individually.
+
+**Via git:**
 ```powershell
-cd C:\ComfyUI\custom_nodes\Nvidia_RTX_Nodes_ComfyUI
+cd ComfyUI_windows_portable\ComfyUI\custom_nodes\Nvidia_RTX_Nodes_ComfyUI
 git pull
 
-cd C:\ComfyUI\custom_nodes\ComfyUI-VideoHelperSuite
+cd ..\ComfyUI-VideoHelperSuite
 git pull
 ```
 
-To update our custom node, re-run the installer or re-copy the folder
-from this project.
-
----
-
-## Verifying everything is working
-
-At ComfyUI startup, the terminal should show:
-
-```
-Import success: Nvidia_RTX_Nodes_ComfyUI
-Import success: ComfyUI-VideoHelperSuite
-Import success: rtx_vsr_single_frame_node
-```
-
-If you see an import error for any node, check
-[docs/troubleshooting.md](../docs/troubleshooting.md).
+To update our custom node, re-copy `rtx_vsr_single_frame_node` from this project
+or re-run `.\comfyui\install_nodes.ps1`.
