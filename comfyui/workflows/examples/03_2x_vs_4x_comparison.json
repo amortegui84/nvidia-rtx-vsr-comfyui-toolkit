@@ -1,0 +1,122 @@
+{
+  "_name": "03 — 2x vs 4x Scale Comparison",
+  "_description": [
+    "Runs the same source image through RTX VSR at both 2x and 4x in parallel,",
+    "then previews both results for direct quality comparison.",
+    "",
+    "Useful for deciding which scale factor to use for a given source.",
+    "",
+    "Node chain:",
+    "  LoadImage ──► RTX VSR 2x ──► PreviewImage  (top branch)",
+    "            └──► RTX VSR 4x ──► PreviewImage  (bottom branch)",
+    "",
+    "Required nodes:",
+    "  - RTXVSRSingleFrameNode  (our custom node)"
+  ],
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [80, 300],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1, 2], "slot_index": 0},
+        {"name": "MASK",  "type": "MASK",  "links": null,   "slot_index": 1}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_image.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "RTXVSRSingleFrameNode",
+      "pos": [480, 120],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXVSRSingleFrameNode"},
+      "widgets_values": ["2x"]
+    },
+    {
+      "id": 3,
+      "type": "RTXVSRSingleFrameNode",
+      "pos": [480, 420],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 2, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [4], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXVSRSingleFrameNode"},
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 4,
+      "type": "SaveImage",
+      "pos": [880, 120],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["rtx_vsr_2x_result"]
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [880, 420],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 4, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["rtx_vsr_4x_result"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 1, 0, 3, 0, "IMAGE"],
+    [3, 2, 0, 4, 0, "IMAGE"],
+    [4, 3, 0, 5, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "2x branch",
+      "bounding": [460, 80, 770, 160],
+      "color": "#3f789e",
+      "font_size": 14,
+      "flags": {}
+    },
+    {
+      "title": "4x branch",
+      "bounding": [460, 380, 770, 160],
+      "color": "#7e5d8e",
+      "font_size": 14,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {"ds": {"scale": 0.8, "offset": [0, 0]}},
+  "version": 0.4
+}

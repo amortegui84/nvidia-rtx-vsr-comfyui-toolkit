@@ -1,0 +1,131 @@
+{
+  "_name": "06 — Upscale then Crop a Region of Interest",
+  "_description": [
+    "Upscale an image 4x with RTX VSR, then crop a specific region",
+    "of the upscaled result for close-up inspection.",
+    "",
+    "Use case: You want to check fine detail quality in a specific area",
+    "(face, text, texture patch) after upscaling, without reviewing the",
+    "full output at 4x resolution.",
+    "",
+    "Required nodes:",
+    "  - RTXVSRSingleFrameNode   (our custom node)",
+    "  - ImageCrop               (built-in ComfyUI node)",
+    "",
+    "Widget guide:",
+    "  ImageCrop: x, y = top-left corner of crop region (in upscaled pixel coords)",
+    "             width, height = size of crop region",
+    "  Example: x=1920, y=1080, width=960, height=540",
+    "           → crops a 960x540 patch from the center of a 4K upscaled image",
+    "",
+    "Node chain:",
+    "  LoadImage ──► RTX VSR 4x ──► ImageCrop ──► SaveImage (cropped detail)",
+    "                            └──────────────────────────► SaveImage (full 4x)"
+  ],
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [80, 300],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1],  "slot_index": 0},
+        {"name": "MASK",  "type": "MASK",  "links": null, "slot_index": 1}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_image.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "RTXVSRSingleFrameNode",
+      "pos": [480, 300],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 1, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [2, 3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXVSRSingleFrameNode"},
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 3,
+      "type": "ImageCrop",
+      "pos": [880, 160],
+      "size": {"0": 315, "1": 126},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 2, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [4], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "ImageCrop"},
+      "widgets_values": [960, 540, 1920, 1080]
+    },
+    {
+      "id": 4,
+      "type": "SaveImage",
+      "pos": [1280, 160],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 4, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["rtx_vsr_4x_crop_detail"]
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [880, 420],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["rtx_vsr_4x_full"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 3, 0, "IMAGE"],
+    [3, 2, 0, 5, 0, "IMAGE"],
+    [4, 3, 0, 4, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Full 4x upscaled output",
+      "bounding": [460, 260, 770, 300],
+      "color": "#568e4e",
+      "font_size": 14,
+      "flags": {}
+    },
+    {
+      "title": "Cropped detail region",
+      "bounding": [860, 120, 760, 180],
+      "color": "#8e6d3f",
+      "font_size": 14,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {"ds": {"scale": 0.75, "offset": [0, 0]}},
+  "version": 0.4
+}

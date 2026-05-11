@@ -1,0 +1,102 @@
+{
+  "_name": "02 — Before / After Preview",
+  "_description": [
+    "Load one image, split the signal into two branches:",
+    "  Branch A → PreviewImage  (shows the original at its native size)",
+    "  Branch B → RTX VSR 4x → PreviewImage  (shows the upscaled version)",
+    "",
+    "Both previews appear side-by-side in the ComfyUI gallery for direct comparison.",
+    "Nothing is written to disk; use SaveImage instead of PreviewImage to keep files.",
+    "",
+    "Required nodes:",
+    "  - RTXVSRSingleFrameNode  (our custom node)"
+  ],
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [80, 300],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1, 2], "slot_index": 0},
+        {"name": "MASK",  "type": "MASK",  "links": null,   "slot_index": 1}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_image.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "PreviewImage",
+      "pos": [480, 120],
+      "size": {"0": 315, "1": 70},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 1, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "PreviewImage"},
+      "widgets_values": []
+    },
+    {
+      "id": 3,
+      "type": "RTXVSRSingleFrameNode",
+      "pos": [480, 380],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 2, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXVSRSingleFrameNode"},
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [880, 380],
+      "size": {"0": 315, "1": 70},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "PreviewImage"},
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 1, 0, 3, 0, "IMAGE"],
+    [3, 3, 0, 4, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Original (no upscale)",
+      "bounding": [460, 80, 360, 160],
+      "color": "#3f789e",
+      "font_size": 14,
+      "flags": {}
+    },
+    {
+      "title": "RTX VSR 4x Upscaled",
+      "bounding": [460, 340, 760, 160],
+      "color": "#568e4e",
+      "font_size": 14,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {"ds": {"scale": 0.85, "offset": [0, 0]}},
+  "version": 0.4
+}

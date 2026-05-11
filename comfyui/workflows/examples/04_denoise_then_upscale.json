@@ -1,0 +1,115 @@
+{
+  "_name": "04 — Denoise then Upscale (NVIDIA RTX pipeline)",
+  "_description": [
+    "Two-stage NVIDIA RTX enhancement pipeline:",
+    "  Stage 1 → RTX Denoise       (removes compression noise and grain)",
+    "  Stage 2 → RTX VSR 4x        (upscales the clean frame)",
+    "",
+    "This is the recommended order: always denoise BEFORE upscaling.",
+    "Upscaling noise first makes artifacts larger and harder to remove.",
+    "",
+    "Required nodes:",
+    "  - RTXVSRSingleFrameNode   (our custom node, comfyui/custom_nodes/)",
+    "  - RTXDenoiseNode          (from Comfy-Org/Nvidia_RTX_Nodes_ComfyUI)",
+    "    OR use 'NNLatentUpscale' / any denoising node as a substitute",
+    "    if the official NVIDIA denoise node is not available.",
+    "",
+    "NOTE: If RTXDenoiseNode is not installed, bypass node 2 by connecting",
+    "  LoadImage directly to RTXVSRSingleFrameNode (link 1 → node 3).",
+    "",
+    "Node chain:",
+    "  LoadImage ──► RTX Denoise ──► RTX VSR 4x ──► SaveImage"
+  ],
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [80, 300],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1],  "slot_index": 0},
+        {"name": "MASK",  "type": "MASK",  "links": null, "slot_index": 1}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["test_image.jpg", "image"]
+    },
+    {
+      "id": 2,
+      "type": "RTXDenoiseNode",
+      "_note": "Requires Comfy-Org/Nvidia_RTX_Nodes_ComfyUI. If unavailable, delete this node and connect LoadImage directly to node 3.",
+      "pos": [480, 300],
+      "size": {"0": 315, "1": 100},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "image",    "type": "IMAGE",  "link": 1, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [2], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXDenoiseNode"},
+      "widgets_values": ["strong"]
+    },
+    {
+      "id": 3,
+      "type": "RTXVSRSingleFrameNode",
+      "pos": [880, 300],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 2, "slot_index": 0}
+      ],
+      "outputs": [
+        {"name": "upscaled_image", "type": "IMAGE", "links": [3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RTXVSRSingleFrameNode"},
+      "widgets_values": ["4x"]
+    },
+    {
+      "id": 4,
+      "type": "SaveImage",
+      "pos": [1280, 300],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3, "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["rtx_denoise_vsr_4x"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 3, 0, "IMAGE"],
+    [3, 3, 0, 4, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Stage 1: Denoise (NVIDIA RTX)",
+      "bounding": [460, 260, 360, 180],
+      "color": "#3f789e",
+      "font_size": 14,
+      "flags": {}
+    },
+    {
+      "title": "Stage 2: Upscale 4x (RTX VSR)",
+      "bounding": [860, 260, 360, 180],
+      "color": "#568e4e",
+      "font_size": 14,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {"ds": {"scale": 0.8, "offset": [0, 0]}},
+  "version": 0.4
+}
