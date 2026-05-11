@@ -1,6 +1,11 @@
 {
   "_name": "05 — Video Frame Sampler (VHS + RTX VSR)",
   "_description": [
+    "MODEL REQUIRED:",
+    "  NVIDIA RTX VSR model files — download the NVIDIA Video Effects SDK:",
+    "  https://developer.nvidia.com/rtx-video-sdk",
+    "  Verify: python scripts/check_environment.py",
+    "",
     "Load a video, pick N frames at a fixed interval, upscale each one via RTX VSR,",
     "and save all upscaled frames to ComfyUI's output folder.",
     "",

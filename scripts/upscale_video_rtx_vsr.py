@@ -114,7 +114,22 @@ class RTXVideoSuperRes:
 
         self._vsr.output_width  = self.out_w
         self._vsr.output_height = self.out_h
-        self._vsr.load()
+
+        # load() locates model files on disk. If it fails, download the SDK:
+        # https://developer.nvidia.com/rtx-video-sdk
+        try:
+            self._vsr.load()
+        except Exception as e:
+            raise RuntimeError(
+                f"nvvfx load() failed: {e}\n\n"
+                "The NVIDIA RTX VSR model files are missing or unreachable.\n"
+                "  1. Download the NVIDIA Video Effects SDK:\n"
+                "     https://developer.nvidia.com/rtx-video-sdk\n"
+                "  2. Run the SDK installer — it places model files at:\n"
+                "     C:\\Program Files\\NVIDIA Corporation\\NVIDIA Video Effects\\models\\\n"
+                "  3. Or set NVVFX_SDK_PATH to your custom model directory.\n"
+                "  4. Verify with: python scripts/check_environment.py"
+            ) from e
 
         print(f"[INFO] RTXVideoSuperRes loaded: {self.scale}x → {self.out_w}x{self.out_h}")
 

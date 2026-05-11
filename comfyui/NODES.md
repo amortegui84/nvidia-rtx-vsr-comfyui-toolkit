@@ -1,5 +1,9 @@
 # ComfyUI Node Guide — NVIDIA RTX VSR Toolkit
 
+> **Before running any workflow, make sure the required model files are installed.**
+> See the [Models](#models) section below.
+
+
 This guide covers every node required by this toolkit: what it does,
 how to install it, and where it appears in ComfyUI.
 
@@ -204,6 +208,68 @@ git pull
 
 To update our custom node, re-copy the `rtx_vsr_single_frame_node` folder
 from this repository, or re-run `install_nodes.ps1`.
+
+---
+
+---
+
+## Models
+
+### NVIDIA RTX VSR model files
+
+Every workflow that uses `RTXVSRSingleFrameNode` or `RTX Video Super Resolution`
+requires the NVIDIA Video Effects SDK model files to be present on disk.
+
+**These are NOT downloaded by `pip install nvidia-vfx`.**
+They are installed separately via the SDK installer.
+
+**Step 1 — Download the SDK:**
+```
+https://developer.nvidia.com/rtx-video-sdk
+```
+
+**Step 2 — Run the installer.**
+The model files are placed automatically at:
+```
+C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models\
+```
+
+**Step 3 — Verify:**
+```powershell
+python scripts/check_environment.py
+```
+The check prints `[PASS] NVVFX model directory` if the models are found.
+
+**Custom model path:**
+If you installed the SDK to a different location, set the environment variable:
+```powershell
+$env:NVVFX_SDK_PATH = "D:\NvVFX\models"
+```
+
+---
+
+### Stable Diffusion checkpoint (workflow 07 only)
+
+Workflow `07_ai_gen_image_enhance.json` uses a KSampler node and requires
+a Stable Diffusion / SDXL / Flux checkpoint.
+
+**Where to place it:**
+```
+ComfyUI\models\checkpoints\your_model.safetensors
+```
+
+**Where to download:**
+| Source | URL |
+|--------|-----|
+| HuggingFace | https://huggingface.co/models |
+| CivitAI | https://civitai.com |
+
+**After placing the file:**
+1. Restart ComfyUI (or refresh the model list).
+2. In the workflow, click `CheckpointLoaderSimple`.
+3. Select your model from the dropdown.
+
+→ Full model guide: [docs/models.md](../docs/models.md)
 
 ---
 

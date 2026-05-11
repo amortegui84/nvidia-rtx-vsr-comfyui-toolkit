@@ -112,8 +112,23 @@ def _run_nvvfx_vsr(input_tensor: "torch.Tensor", scale: int) -> "torch.Tensor":
     vsr.output_width  = out_w
     vsr.output_height = out_h
 
-    # load() downloads/initialises the model weights. Call once per effect instance.
-    vsr.load()
+    # load() initialises the effect and locates the model weights on disk.
+    # If this raises a RuntimeError about missing models, download the
+    # NVIDIA Video Effects SDK from: https://developer.nvidia.com/rtx-video-sdk
+    # Then re-run: python scripts/check_environment.py
+    try:
+        vsr.load()
+    except Exception as e:
+        raise RuntimeError(
+            f"nvvfx load() failed: {e}\n\n"
+            "The NVIDIA RTX VSR model files are missing or unreachable.\n"
+            "  1. Download the NVIDIA Video Effects SDK:\n"
+            "     https://developer.nvidia.com/rtx-video-sdk\n"
+            "  2. Run the SDK installer — it places model files at:\n"
+            "     C:\\Program Files\\NVIDIA Corporation\\NVIDIA Video Effects\\models\\\n"
+            "  3. Or set NVVFX_SDK_PATH to your custom model directory.\n"
+            "  4. Verify with: python scripts/check_environment.py"
+        ) from e
 
     # Assign input tensor. The tensor must be:
     #   - On CUDA (device='cuda')

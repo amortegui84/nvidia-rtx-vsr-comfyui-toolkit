@@ -44,9 +44,14 @@ outputs/benchmarks/*
 !outputs/frames/.gitkeep
 !outputs/benchmarks/.gitkeep
 
-# NVIDIA model cache
-*.nvvfx_models/
-models/
+# NVIDIA model cache — ignore binary model files but keep README
+models/*.nvmdl
+models/*.bin
+models/*.onnx
+models/*.trt
+models/*.pt
+models/*.pth
+!models/README.md
 
 # Logs
 *.log

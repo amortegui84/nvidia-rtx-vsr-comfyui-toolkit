@@ -1,6 +1,11 @@
 {
   "_name": "03 — 2x vs 4x Scale Comparison",
   "_description": [
+    "MODEL REQUIRED:",
+    "  NVIDIA RTX VSR model files — download the NVIDIA Video Effects SDK:",
+    "  https://developer.nvidia.com/rtx-video-sdk",
+    "  Verify: python scripts/check_environment.py",
+    "",
     "Runs the same source image through RTX VSR at both 2x and 4x in parallel,",
     "then previews both results for direct quality comparison.",
     "",

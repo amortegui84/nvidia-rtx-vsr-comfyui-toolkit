@@ -1,6 +1,11 @@
 {
   "_name": "06 — Upscale then Crop a Region of Interest",
   "_description": [
+    "MODEL REQUIRED:",
+    "  NVIDIA RTX VSR model files — download the NVIDIA Video Effects SDK:",
+    "  https://developer.nvidia.com/rtx-video-sdk",
+    "  Verify: python scripts/check_environment.py",
+    "",
     "Upscale an image 4x with RTX VSR, then crop a specific region",
     "of the upscaled result for close-up inspection.",
     "",

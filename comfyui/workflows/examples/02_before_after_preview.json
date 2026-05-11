@@ -1,6 +1,11 @@
 {
   "_name": "02 — Before / After Preview",
   "_description": [
+    "MODEL REQUIRED:",
+    "  NVIDIA RTX VSR model files — download the NVIDIA Video Effects SDK:",
+    "  https://developer.nvidia.com/rtx-video-sdk",
+    "  Verify: python scripts/check_environment.py",
+    "",
     "Load one image, split the signal into two branches:",
     "  Branch A → PreviewImage  (shows the original at its native size)",
     "  Branch B → RTX VSR 4x → PreviewImage  (shows the upscaled version)",

@@ -1,6 +1,11 @@
 {
   "_name": "04 — Denoise then Upscale (NVIDIA RTX pipeline)",
   "_description": [
+    "MODEL REQUIRED:",
+    "  NVIDIA RTX VSR model files — download the NVIDIA Video Effects SDK:",
+    "  https://developer.nvidia.com/rtx-video-sdk",
+    "  Verify: python scripts/check_environment.py",
+    "",
     "Two-stage NVIDIA RTX enhancement pipeline:",
     "  Stage 1 → RTX Denoise       (removes compression noise and grain)",
     "  Stage 2 → RTX VSR 4x        (upscales the clean frame)",

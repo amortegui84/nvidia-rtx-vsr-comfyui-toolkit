@@ -200,6 +200,46 @@ def check_packages() -> None:
             print(f"{FAIL}  {pkg_name} not installed — run: pip install {pkg_name}")
 
 
+def check_nvvfx_models() -> bool:
+    """Check that the NVIDIA Video Effects SDK model files are present."""
+    default_paths = [
+        r"C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects\models",
+        r"C:\Program Files\NVIDIA Corporation\NVIDIA Video Effects",
+    ]
+    env_path = os.environ.get("NVVFX_SDK_PATH", "")
+    if env_path:
+        default_paths.insert(0, env_path)
+
+    found_path = None
+    for p in default_paths:
+        if os.path.isdir(p):
+            found_path = p
+            break
+
+    if found_path:
+        # Look for any .nvmdl or model-like files
+        model_files = [
+            f for f in os.listdir(found_path)
+            if f.endswith((".nvmdl", ".bin", ".onnx", ".trt"))
+        ]
+        if model_files:
+            print(f"{PASS}  NVVFX model directory: {found_path}")
+            print(f"       Model files found: {len(model_files)}")
+            return True
+        else:
+            print(f"{WARN}  NVVFX model directory exists but appears empty: {found_path}")
+            print(f"       Download the SDK at: https://developer.nvidia.com/rtx-video-sdk")
+            return False
+    else:
+        print(f"{FAIL}  NVVFX model directory not found.")
+        print(f"       Download the NVIDIA Video Effects SDK:")
+        print(f"       https://developer.nvidia.com/rtx-video-sdk")
+        print(f"       After installing, models land at:")
+        print(f"       C:\\Program Files\\NVIDIA Corporation\\NVIDIA Video Effects\\models\\")
+        print(f"       Or set NVVFX_SDK_PATH to a custom model directory.")
+        return False
+
+
 def check_output_dirs() -> None:
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     required = [
@@ -238,6 +278,9 @@ def main() -> None:
     section("NVIDIA nvidia-vfx")
     results["nvvfx"] = check_nvvfx()
 
+    section("NVIDIA VSR Model Files")
+    results["nvvfx_models"] = check_nvvfx_models()
+
     section("FFmpeg")
     results["ffmpeg"] = check_ffmpeg()
 
@@ -246,7 +289,7 @@ def main() -> None:
 
     # ── Summary ──────────────────────────────────────────────────────────────
     section("Summary")
-    critical = ["python", "cuda", "torch", "nvvfx", "ffmpeg"]
+    critical = ["python", "cuda", "torch", "nvvfx", "nvvfx_models", "ffmpeg"]
     all_ok = True
     for key in critical:
         val = results.get(key, False)
