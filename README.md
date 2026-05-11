@@ -1,16 +1,16 @@
 # nvidia-rtx-vsr-comfyui-toolkit
 
-Toolkit para usar **NVIDIA RTX Video Super Resolution (RTX VSR)** en ComfyUI
-y scripts Python. Diseñado para RTX 5090 (Blackwell). Soporta upscaling de
-video, imágenes estáticas, y frames individuales de AI generativa.
+Toolkit for using **NVIDIA RTX Video Super Resolution (RTX VSR)** inside
+ComfyUI and standalone Python scripts. Designed for RTX 5090 (Blackwell).
+Supports video upscaling, still images, and individual AI-generated frames.
 
 ---
 
-## Inicio rápido — ComfyUI
+## Quick Start — ComfyUI
 
-### 1. Instala los nodos (un solo comando)
+### 1. Install the nodes (one command)
 
-**Windows (PowerShell) — desde la raíz del proyecto:**
+**Windows (PowerShell) — run from the project root:**
 ```powershell
 .\comfyui\install_nodes.ps1
 ```
@@ -20,160 +20,156 @@ video, imágenes estáticas, y frames individuales de AI generativa.
 bash comfyui/install_nodes.sh
 ```
 
-El script hace todo automáticamente:
-- Detecta tu instalación de ComfyUI
-- Clona los nodos oficiales de NVIDIA
-- Clona ComfyUI-VideoHelperSuite (para video)
-- Copia nuestro nodo custom `RTX VSR Single Frame`
-- Instala `nvidia-vfx`
+The script does everything automatically:
+- Detects your ComfyUI installation
+- Clones the official NVIDIA RTX nodes
+- Clones ComfyUI-VideoHelperSuite (for video workflows)
+- Copies our custom `RTX VSR Single Frame` node
+- Installs `nvidia-vfx`
 
-→ Ver guía completa de nodos: [comfyui/NODES.md](comfyui/NODES.md)
-
----
-
-### 2. Reinicia ComfyUI
-
-Después de instalar los nodos, reinicia ComfyUI completamente.
+→ Full node guide: [comfyui/NODES.md](comfyui/NODES.md)
 
 ---
 
-### 3. Carga un workflow de ejemplo
+### 2. Restart ComfyUI
 
-Arrastra cualquiera de estos JSON al canvas de ComfyUI:
+After installing nodes, restart ComfyUI completely.
 
-| Archivo | Descripción |
-|---------|-------------|
-| `comfyui/workflows/examples/01_quick_4x_upscale.json` | Upscale 4x rápido |
-| `comfyui/workflows/examples/02_before_after_preview.json` | Original vs upscaleado |
-| `comfyui/workflows/examples/03_2x_vs_4x_comparison.json` | Compara 2x y 4x |
+---
+
+### 3. Load a workflow
+
+Drag any of these JSON files onto the ComfyUI canvas:
+
+| File | Description |
+|------|-------------|
+| `comfyui/workflows/examples/01_quick_4x_upscale.json` | Simplest 4x upscale |
+| `comfyui/workflows/examples/02_before_after_preview.json` | Original vs upscaled side-by-side |
+| `comfyui/workflows/examples/03_2x_vs_4x_comparison.json` | Compare both scale factors |
 | `comfyui/workflows/examples/04_denoise_then_upscale.json` | Denoise → VSR 4x |
-| `comfyui/workflows/examples/05_video_frame_sampler.json` | Frames de video → VSR |
-| `comfyui/workflows/examples/06_upscale_then_crop_tile.json` | Upscale + recorte de detalle |
-| `comfyui/workflows/examples/07_ai_gen_image_enhance.json` | SD/SDXL → RTX VSR 4x |
+| `comfyui/workflows/examples/05_video_frame_sampler.json` | Sample video frames → VSR |
+| `comfyui/workflows/examples/06_upscale_then_crop_tile.json` | Upscale + crop detail region |
+| `comfyui/workflows/examples/07_ai_gen_image_enhance.json` | SD/SDXL generation → RTX VSR 4x |
 
-→ Ver descripción de cada workflow: [comfyui/workflows/examples/README.md](comfyui/workflows/examples/README.md)
+→ Workflow descriptions: [comfyui/workflows/examples/README.md](comfyui/workflows/examples/README.md)
 
 ---
 
-## Nodos disponibles tras la instalación
+## Available Nodes After Installation
 
-### RTX VSR Single Frame Upscale *(nuestro nodo custom)*
+### RTX VSR Single Frame Upscale *(our custom node)*
 
-> Categoría en ComfyUI: **NVIDIA RTX / Super Resolution**
+> ComfyUI category: **NVIDIA RTX / Super Resolution**
 
-Upscalea una imagen o frame individual con NVIDIA RTX VSR.
+Upscales a single image or frame using NVIDIA RTX VSR.
 
 ```
-[IMAGE] ──► RTX VSR Single Frame Upscale ──► [IMAGE upscaleada]
-                    │
-              scale_factor: 4x / 2x
+[IMAGE] ──► RTX VSR Single Frame Upscale ──► [IMAGE upscaled]
+                     │
+               scale_factor: 4x / 2x
 ```
 
-- Entrada: IMAGE estándar de ComfyUI `(B, H, W, C)`
-- Salida: IMAGE upscaleada al mismo formato
-- Funciona con cualquier imagen: fotos, renders, salidas de KSampler, etc.
+- Input: standard ComfyUI IMAGE tensor `(B, H, W, C)`
+- Output: upscaled IMAGE at the same format
+- Works with any image: photos, renders, KSampler outputs, etc.
 
 ---
 
-### RTX Video Super Resolution *(NVIDIA oficial)*
+### RTX Video Super Resolution *(official NVIDIA)*
 
-> Categoría en ComfyUI: **NVIDIA RTX**
+> ComfyUI category: **NVIDIA RTX**
 
-Nodo oficial de Comfy-Org para upscaling de video completo.
-Requiere: [Nvidia_RTX_Nodes_ComfyUI](https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI)
+Official Comfy-Org node for full video upscaling.
+Requires: [Nvidia_RTX_Nodes_ComfyUI](https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI)
 
 ---
 
-### RTX Denoise *(NVIDIA oficial)*
+### RTX Denoise *(official NVIDIA)*
 
-> Categoría en ComfyUI: **NVIDIA RTX**
+> ComfyUI category: **NVIDIA RTX**
 
-Elimina ruido y artefactos de compresión antes del upscaling.
-Úsalo siempre **antes** del nodo de upscaling para mejores resultados.
+Removes noise and compression artifacts before upscaling.
+Always use **before** the upscale node for best results.
 
 ---
 
 ### VHS LoadVideo / VHS VideoCombine *(VideoHelperSuite)*
 
-Carga y guarda video en ComfyUI. Necesario para los workflows de video.
-Requiere: [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
+Load and save video inside ComfyUI.
+Requires: [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
 
 ---
 
-## Pipeline recomendado para imagen AI generada
+## Recommended Pipelines
+
+### AI-generated image (SD / SDXL / Flux output)
 
 ```
 [CheckpointLoader] ──► [KSampler] ──► [VAEDecode] ──► [RTX VSR 4x] ──► [SaveImage]
 ```
 
-Genera a 768×768 con tu modelo → RTX VSR sube a 3072×3072 instantáneamente.
-Workflow listo: `07_ai_gen_image_enhance.json`
+Generate at 768×768 → RTX VSR outputs 3072×3072 instantly.
+Ready workflow: `07_ai_gen_image_enhance.json`
 
 ---
 
-## Pipeline recomendado para imagen con ruido / compresión
+### Noisy or compressed source image
 
 ```
 [LoadImage] ──► [RTX Denoise] ──► [RTX VSR 4x] ──► [SaveImage]
 ```
 
-Limpia primero, luego escala. El upscaling amplifica el ruido si no se hace primero.
-Workflow listo: `04_denoise_then_upscale.json`
+Clean first, then scale. Upscaling amplifies noise if not removed first.
+Ready workflow: `04_denoise_then_upscale.json`
 
 ---
 
-## Pipeline recomendado para video
+### Video quality check before full upscale
 
-```
-[VHS_LoadVideo] ──► [RTX VSR Single Frame] ──► [VHS_VideoCombine]
-```
-
-Para verificar calidad antes del video completo:
 ```
 [VHS_LoadVideo] ──► [VHS_GetImageBatch (frame N)] ──► [RTX VSR 4x] ──► [SaveImage]
 ```
 
-Workflow listo: `05_video_frame_sampler.json`
+Sample individual frames to verify quality before processing the full clip.
+Ready workflow: `05_video_frame_sampler.json`
 
 ---
 
-## Scripts Python (alternativa sin ComfyUI)
-
-Para procesamiento en batch o sin interfaz:
+## Python Scripts (standalone, no ComfyUI needed)
 
 ```powershell
-# Verificar entorno
+# Verify environment
 python scripts/check_environment.py
 
-# Upscale de imagen
-python scripts/upscale_image_rtx_vsr.py --input inputs/images/foto.jpg --output outputs/images/foto_4x.png --scale 4
+# Upscale a still image
+python scripts/upscale_image_rtx_vsr.py --input inputs/images/photo.jpg --output outputs/images/photo_4x.png --scale 4
 
-# Upscale de video
+# Upscale a video
 python scripts/upscale_video_rtx_vsr.py --input inputs/videos/clip.mp4 --output outputs/videos/clip_4x.mp4 --scale 4
 
-# Frame de video → upscale
+# Extract one frame and upscale it
 python scripts/extract_frame_test.py --input inputs/videos/clip.mp4 --frame 10 --scale 4
 
-# Benchmark completo
+# Run benchmark and generate report
 python scripts/benchmark_rtx_vsr.py --scale 4
 ```
 
 ---
 
-## Requisitos
+## Requirements
 
-| Componente | Versión mínima |
-|------------|---------------|
-| GPU | NVIDIA RTX (recomendado RTX 5090) |
-| Driver Windows | ≥ 531 (≥ 570 para RTX 5090 / Blackwell) |
+| Component | Minimum version |
+|-----------|----------------|
+| GPU | NVIDIA RTX (RTX 5090 recommended) |
+| NVIDIA Driver (Windows) | ≥ 531 (≥ 570 for RTX 5090 / Blackwell) |
 | Python | 3.10 / 3.11 / 3.12 |
-| PyTorch | 2.1+ (build CUDA) |
-| nvidia-vfx | Última desde pypi.nvidia.com |
-| FFmpeg | Cualquier versión reciente |
+| PyTorch | 2.1+ (CUDA build) |
+| nvidia-vfx | Latest from pypi.nvidia.com |
+| FFmpeg | Any recent version |
 
 ---
 
-## Instalación del entorno Python
+## Python Environment Setup
 
 ```powershell
 python -m venv .venv
@@ -184,22 +180,22 @@ pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.c
 python scripts/check_environment.py
 ```
 
-→ Guía detallada: [setup_instructions.md](setup_instructions.md)
+→ Full setup guide: [setup_instructions.md](setup_instructions.md)
 
 ---
 
-## Estructura del proyecto
+## Project Structure
 
 ```
 nvidia-rtx-vsr-comfyui-toolkit/
   comfyui/
-    install_nodes.ps1              ← instalador automático (Windows)
-    install_nodes.sh               ← instalador automático (Linux/Mac)
-    NODES.md                       ← guía completa de nodos
+    install_nodes.ps1              ← auto-installer (Windows)
+    install_nodes.sh               ← auto-installer (Linux / macOS)
+    NODES.md                       ← complete node guide
     custom_nodes/
-      rtx_vsr_single_frame_node/  ← nuestro nodo custom
+      rtx_vsr_single_frame_node/  ← our custom node
     workflows/
-      examples/                    ← 7 workflows listos para usar
+      examples/                    ← 7 ready-to-use workflows
         01_quick_4x_upscale.json
         02_before_after_preview.json
         03_2x_vs_4x_comparison.json
@@ -209,7 +205,7 @@ nvidia-rtx-vsr-comfyui-toolkit/
         07_ai_gen_image_enhance.json
         README.md
 
-  scripts/                         ← scripts Python CLI
+  scripts/                         ← standalone Python CLI
     check_environment.py
     upscale_image_rtx_vsr.py
     upscale_video_rtx_vsr.py
@@ -217,16 +213,16 @@ nvidia-rtx-vsr-comfyui-toolkit/
     benchmark_rtx_vsr.py
     test_rtx_vsr.py
 
-  inputs/  outputs/  docs/
+  inputs/   outputs/   docs/
 ```
 
 ---
 
-## Referencias
+## References
 
 - [NVIDIA RTX Video SDK](https://developer.nvidia.com/rtx-video-sdk)
-- [nvidia-vfx en PyPI NVIDIA](https://pypi.org/project/nvidia-vfx/)
-- [Nvidia_RTX_Nodes_ComfyUI (oficial)](https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI)
+- [nvidia-vfx on PyPI (NVIDIA index)](https://pypi.org/project/nvidia-vfx/)
+- [Nvidia_RTX_Nodes_ComfyUI (official)](https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI)
 - [ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite)
-- [Guía de nodos](comfyui/NODES.md)
+- [Node guide](comfyui/NODES.md)
 - [Troubleshooting](docs/troubleshooting.md)

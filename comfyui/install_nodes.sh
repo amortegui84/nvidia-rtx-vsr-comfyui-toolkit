@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # install_nodes.sh
 # ----------------
-# Instala automaticamente todos los nodos de ComfyUI necesarios
-# para el toolkit NVIDIA RTX VSR (Linux / macOS).
+# Automatically installs all ComfyUI nodes required for the
+# NVIDIA RTX VSR toolkit (Linux / macOS).
 #
-# Uso:
+# Usage:
 #   bash comfyui/install_nodes.sh
-#   bash comfyui/install_nodes.sh /ruta/a/ComfyUI
+#   bash comfyui/install_nodes.sh /path/to/ComfyUI
 
 set -e
 
@@ -15,16 +15,16 @@ pass() { echo -e "${GREEN}[PASS]${RESET} $1"; }
 warn() { echo -e "${YELLOW}[WARN]${RESET} $1"; }
 fail() { echo -e "${RED}[FAIL]${RESET} $1"; exit 1; }
 info() { echo -e "${CYAN}[INFO]${RESET} $1"; }
-step() { echo -e "\n── $1"; }
+step() { echo -e "\n-- $1"; }
 
 echo ""
-echo -e "${CYAN}===========================================${RESET}"
-echo -e "${CYAN}  NVIDIA RTX VSR — ComfyUI Node Installer ${RESET}"
-echo -e "${CYAN}===========================================${RESET}"
+echo -e "${CYAN}==========================================${RESET}"
+echo -e "${CYAN}  NVIDIA RTX VSR -- ComfyUI Node Installer${RESET}"
+echo -e "${CYAN}==========================================${RESET}"
 echo ""
 
-# ── Localizar ComfyUI ─────────────────────────────────────────────────────────
-step "Localizando ComfyUI"
+# ── Locate ComfyUI ────────────────────────────────────────────────────────────
+step "Locating ComfyUI installation"
 
 COMFYUI_PATH="${1:-}"
 COMMON_PATHS=(
@@ -38,55 +38,55 @@ if [ -z "$COMFYUI_PATH" ]; then
     for p in "${COMMON_PATHS[@]}"; do
         if [ -d "$p/custom_nodes" ]; then
             COMFYUI_PATH="$p"
-            pass "ComfyUI encontrado en: $COMFYUI_PATH"
+            pass "ComfyUI found at: $COMFYUI_PATH"
             break
         fi
     done
 fi
 
 if [ -z "$COMFYUI_PATH" ] || [ ! -d "$COMFYUI_PATH/custom_nodes" ]; then
-    warn "No se pudo detectar ComfyUI automaticamente."
-    read -rp "Ingresa la ruta a ComfyUI: " COMFYUI_PATH
-    [ -d "$COMFYUI_PATH/custom_nodes" ] || fail "custom_nodes no existe en: $COMFYUI_PATH"
+    warn "Could not auto-detect ComfyUI."
+    read -rp "Enter the full path to your ComfyUI installation: " COMFYUI_PATH
+    [ -d "$COMFYUI_PATH/custom_nodes" ] || fail "custom_nodes not found at: $COMFYUI_PATH"
 fi
 
 CUSTOM_NODES="$COMFYUI_PATH/custom_nodes"
-info "custom_nodes: $CUSTOM_NODES"
+info "custom_nodes path: $CUSTOM_NODES"
 
-# ── Verificar dependencias ────────────────────────────────────────────────────
-step "Verificando dependencias"
-command -v git    >/dev/null 2>&1 || fail "git no instalado. Instala con: sudo apt install git"
-command -v python >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1 || fail "python no encontrado"
+# ── Check dependencies ────────────────────────────────────────────────────────
+step "Checking dependencies"
+command -v git    >/dev/null 2>&1 || fail "git not installed. Run: sudo apt install git"
+command -v python >/dev/null 2>&1 || command -v python3 >/dev/null 2>&1 || fail "python not found"
 PYTHON=$(command -v python3 || command -v python)
 pass "git: $(git --version)"
 pass "python: $($PYTHON --version)"
 
-# ── Clonar o actualizar un nodo ───────────────────────────────────────────────
+# ── Clone or update a node repo ───────────────────────────────────────────────
 install_node() {
     local name="$1" url="$2" folder="$3" requirements="${4:-}"
     local dest="$CUSTOM_NODES/$folder"
 
-    step "Nodo: $name"
+    step "Node: $name"
 
     if [ -d "$dest/.git" ]; then
-        info "Ya existe. Actualizando..."
+        info "Already installed. Updating..."
         git -C "$dest" pull --ff-only
-        pass "$name actualizado."
+        pass "$name updated."
     else
         [ -d "$dest" ] && rm -rf "$dest"
-        info "Clonando desde $url ..."
+        info "Cloning from $url ..."
         git clone "$url" "$dest"
-        pass "$name clonado en: $dest"
+        pass "$name cloned to: $dest"
     fi
 
     if [ -n "$requirements" ] && [ -f "$dest/$requirements" ]; then
-        info "Instalando requirements..."
+        info "Installing requirements..."
         $PYTHON -m pip install -r "$dest/$requirements" --quiet
-        pass "Requirements instalados."
+        pass "Requirements installed."
     fi
 }
 
-# ── Copiar nuestro nodo local ─────────────────────────────────────────────────
+# ── Copy our local custom node ────────────────────────────────────────────────
 install_local_node() {
     local name="$1" src_folder="$2" dest_folder="$3"
     local script_dir
@@ -94,16 +94,17 @@ install_local_node() {
     local src="$script_dir/custom_nodes/$src_folder"
     local dest="$CUSTOM_NODES/$dest_folder"
 
-    step "Nodo local: $name"
-    [ -d "$src" ] || { warn "No se encuentra: $src"; return; }
+    step "Local node: $name"
+    [ -d "$src" ] || { warn "Source not found: $src"; return; }
     [ -d "$dest" ] && rm -rf "$dest"
     cp -r "$src" "$dest"
-    pass "$name copiado en: $dest"
+    pass "$name copied to: $dest"
 }
 
-# ── Instalacion ───────────────────────────────────────────────────────────────
+# ── Install nodes ─────────────────────────────────────────────────────────────
+
 install_node \
-    "NVIDIA RTX Nodes for ComfyUI (oficial)" \
+    "NVIDIA RTX Nodes for ComfyUI (official)" \
     "https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git" \
     "Nvidia_RTX_Nodes_ComfyUI" \
     "requirements.txt"
@@ -115,34 +116,34 @@ install_node \
     "requirements.txt"
 
 install_local_node \
-    "RTX VSR Single Frame Node (este toolkit)" \
+    "RTX VSR Single Frame Node (this toolkit)" \
     "rtx_vsr_single_frame_node" \
     "rtx_vsr_single_frame_node"
 
-# ── nvidia-vfx ────────────────────────────────────────────────────────────────
-step "Instalando nvidia-vfx"
+# ── Install nvidia-vfx ────────────────────────────────────────────────────────
+step "Installing nvidia-vfx"
 if $PYTHON -c "import nvvfx" 2>/dev/null; then
-    pass "nvidia-vfx ya esta instalado."
+    pass "nvidia-vfx is already installed."
 else
-    info "Instalando desde pypi.nvidia.com ..."
+    info "Installing from pypi.nvidia.com ..."
     $PYTHON -m pip install -U --no-build-isolation nvidia-vfx \
         --index-url https://pypi.nvidia.com
-    $PYTHON -c "import nvvfx" 2>/dev/null && pass "nvidia-vfx instalado." \
-        || warn "Verifica la instalacion manualmente."
+    $PYTHON -c "import nvvfx" 2>/dev/null && pass "nvidia-vfx installed." \
+        || warn "Verify installation manually."
 fi
 
-# ── Resumen ───────────────────────────────────────────────────────────────────
+# ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${CYAN}==========================================${RESET}"
-echo -e "${CYAN}  Instalacion completa${RESET}"
+echo -e "${CYAN}  Installation complete${RESET}"
 echo -e "${CYAN}==========================================${RESET}"
 echo ""
-echo "Nodos instalados en: $CUSTOM_NODES"
+echo "Nodes installed in: $CUSTOM_NODES"
 echo ""
-echo -e "${GREEN}  Nvidia_RTX_Nodes_ComfyUI/       (nodos oficiales NVIDIA)${RESET}"
-echo -e "${GREEN}  ComfyUI-VideoHelperSuite/        (carga/guarda video)${RESET}"
-echo -e "${GREEN}  rtx_vsr_single_frame_node/       (nuestro nodo custom)${RESET}"
+echo -e "${GREEN}  Nvidia_RTX_Nodes_ComfyUI/     (official NVIDIA nodes)${RESET}"
+echo -e "${GREEN}  ComfyUI-VideoHelperSuite/     (load / save video)${RESET}"
+echo -e "${GREEN}  rtx_vsr_single_frame_node/    (our custom node)${RESET}"
 echo ""
-echo -e "${YELLOW}Reinicia ComfyUI y busca:${RESET}"
+echo -e "${YELLOW}Next step: restart ComfyUI and search for:${RESET}"
 echo -e "${YELLOW}  NVIDIA RTX / Super Resolution -> RTX VSR Single Frame Upscale${RESET}"
 echo ""

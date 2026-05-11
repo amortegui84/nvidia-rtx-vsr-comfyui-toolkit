@@ -1,13 +1,13 @@
-# Guía de Nodos ComfyUI — NVIDIA RTX VSR Toolkit
+# ComfyUI Node Guide — NVIDIA RTX VSR Toolkit
 
-Esta guía explica qué nodos se necesitan, cómo instalarlos, y dónde
-aparecen en ComfyUI.
+This guide covers every node required by this toolkit: what it does,
+how to install it, and where it appears in ComfyUI.
 
 ---
 
-## Instalación automática (recomendado)
+## Automatic installation (recommended)
 
-Ejecuta el script instalador desde la raíz del proyecto:
+Run the installer script from the project root:
 
 **Windows (PowerShell):**
 ```powershell
@@ -19,44 +19,44 @@ Ejecuta el script instalador desde la raíz del proyecto:
 bash comfyui/install_nodes.sh
 ```
 
-El script detecta tu instalación de ComfyUI, clona los repos necesarios,
-copia nuestro nodo custom, e instala `nvidia-vfx`.
+The script auto-detects your ComfyUI installation, clones all required
+repos, copies our custom node, and installs `nvidia-vfx`.
 
 ---
 
-## Instalación manual paso a paso
+## Manual installation — step by step
 
-### Paso 1 — Localiza tu carpeta `custom_nodes`
+### Step 1 — Find your `custom_nodes` folder
 
-Es la carpeta donde ComfyUI carga todos los nodos adicionales.
-Está dentro de tu instalación de ComfyUI:
+This is where ComfyUI loads all additional nodes.
+It lives inside your ComfyUI installation:
 
 ```
 ComfyUI/
-  custom_nodes/    ← aquí van todos los nodos
+  custom_nodes/    ← all nodes go here
   models/
   output/
   ...
 ```
 
-Rutas comunes en Windows:
+Common paths on Windows:
 ```
 C:\ComfyUI\custom_nodes\
-C:\Users\TuUsuario\ComfyUI\custom_nodes\
+C:\Users\YourName\ComfyUI\custom_nodes\
 ```
 
 ---
 
-### Paso 2 — Nodo oficial NVIDIA RTX Nodes for ComfyUI
+### Step 2 — Official NVIDIA RTX Nodes for ComfyUI
 
-**Repositorio:** https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI
+**Repository:** https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI
 
-**Qué incluye:**
-- `RTX Video Super Resolution` — upscaling de video completo
-- `RTX Denoise` — eliminación de ruido con hardware RTX
-- `RTX Artifact Reduction` — reduce artefactos de compresión
+**What it includes:**
+- `RTX Video Super Resolution` — full video upscaling
+- `RTX Denoise` — hardware-accelerated noise removal
+- `RTX Artifact Reduction` — reduces compression artifacts
 
-**Instalar:**
+**Install:**
 ```powershell
 cd C:\ComfyUI\custom_nodes
 git clone https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git
@@ -64,32 +64,26 @@ cd Nvidia_RTX_Nodes_ComfyUI
 pip install -r requirements.txt
 ```
 
-**Dónde aparece en ComfyUI:**
-> Doble clic en el canvas → busca `RTX` → categoría `NVIDIA RTX`
+**Where it appears in ComfyUI:**
+> Double-click canvas → search `RTX` → category **NVIDIA RTX**
 
 ---
 
-### Paso 3 — Nuestro nodo custom: RTX VSR Single Frame
+### Step 3 — Our custom node: RTX VSR Single Frame
 
-**Qué hace:** Upscaling de imágenes y frames individuales con RTX VSR.
-Pensado para imágenes estáticas y salidas de generación AI (SD, SDXL, Flux).
+**What it does:** Upscales individual images and frames with RTX VSR.
+Designed for static images and AI-generated outputs (SD, SDXL, Flux).
 
-**Instalar (copia la carpeta):**
+**Install — copy the folder:**
 
 ```powershell
-# Desde la raiz del proyecto
+# From the project root
 Copy-Item -Recurse `
   ".\comfyui\custom_nodes\rtx_vsr_single_frame_node" `
   "C:\ComfyUI\custom_nodes\rtx_vsr_single_frame_node"
 ```
 
-O manualmente: copia la carpeta entera aquí:
-```
-comfyui/custom_nodes/rtx_vsr_single_frame_node/
-  → C:\ComfyUI\custom_nodes\rtx_vsr_single_frame_node\
-```
-
-**Estructura que debe quedar:**
+Or copy manually — the destination must look like this:
 ```
 C:\ComfyUI\custom_nodes\rtx_vsr_single_frame_node\
   __init__.py
@@ -97,27 +91,28 @@ C:\ComfyUI\custom_nodes\rtx_vsr_single_frame_node\
   README.md
 ```
 
-**Dónde aparece en ComfyUI:**
-> Doble clic en el canvas → busca `RTX VSR` → categoría `NVIDIA RTX / Super Resolution`
-> Nombre del nodo: **RTX VSR Single Frame Upscale**
+**Where it appears in ComfyUI:**
+> Double-click canvas → search `RTX VSR`
+> Category: **NVIDIA RTX / Super Resolution**
+> Node name: **RTX VSR Single Frame Upscale**
 
 **Inputs / Outputs:**
 
-| Puerto | Tipo | Descripción |
-|--------|------|-------------|
-| `image` (entrada) | IMAGE | Imagen ComfyUI estándar `(B, H, W, C)` |
-| `scale_factor` | Widget | `4x` o `2x` |
-| `upscaled_image` (salida) | IMAGE | Imagen upscaleada `(1, H*scale, W*scale, C)` |
+| Port | Type | Description |
+|------|------|-------------|
+| `image` (input) | IMAGE | Standard ComfyUI image tensor `(B, H, W, C)` |
+| `scale_factor` | Widget | `4x` or `2x` |
+| `upscaled_image` (output) | IMAGE | Upscaled image `(1, H×scale, W×scale, C)` |
 
 ---
 
-### Paso 4 — ComfyUI-VideoHelperSuite (VHS)
+### Step 4 — ComfyUI-VideoHelperSuite (VHS)
 
-Necesario para los workflows que cargan o guardan video.
+Required for any workflow that loads or saves video.
 
-**Repositorio:** https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
+**Repository:** https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite
 
-**Instalar:**
+**Install:**
 ```powershell
 cd C:\ComfyUI\custom_nodes
 git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
@@ -125,55 +120,55 @@ cd ComfyUI-VideoHelperSuite
 pip install -r requirements.txt
 ```
 
-**Nodos que agrega:**
-- `VHS_LoadVideo` — carga video desde archivo
-- `VHS_VideoCombine` — guarda frames como video
-- `VHS_GetLatentCount` — info del batch
+**Nodes it adds:**
+- `VHS_LoadVideo` — load video from file, outputs IMAGE batch
+- `VHS_VideoCombine` — save IMAGE batch as video file
+- `VHS_GetLatentCount` — batch info
 
 ---
 
-### Paso 5 — Instalar nvidia-vfx
+### Step 5 — Install nvidia-vfx
 
 ```powershell
 pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
 ```
 
-Si falla:
+If that fails:
 ```powershell
 python -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com
 ```
 
-Verificar:
+Verify:
 ```powershell
 python -c "import nvvfx; print('OK:', dir(nvvfx))"
 ```
 
 ---
 
-### Paso 6 — Reiniciar ComfyUI
+### Step 6 — Restart ComfyUI
 
-Después de cualquier instalación de nodos, **siempre reinicia ComfyUI**.
-Los nodos se cargan solo al arrancar.
+After installing any node, **always restart ComfyUI fully**.
+Nodes are only loaded at startup.
 
-Si un nodo aparece en **rojo** después de reiniciar:
-→ Ve a [docs/troubleshooting.md](../docs/troubleshooting.md) sección "ComfyUI custom node not appearing".
+If a node appears **red** after restarting:
+→ See [docs/troubleshooting.md](../docs/troubleshooting.md) — "ComfyUI custom node not appearing".
 
 ---
 
-## Resumen: estado esperado de `custom_nodes/`
+## Expected `custom_nodes/` structure
 
 ```
 C:\ComfyUI\custom_nodes\
-  Nvidia_RTX_Nodes_ComfyUI\          ← nodos NVIDIA oficiales
+  Nvidia_RTX_Nodes_ComfyUI\          ← official NVIDIA nodes
     __init__.py
     requirements.txt
     nodes\
       ...
-  ComfyUI-VideoHelperSuite\          ← carga y guarda video
+  ComfyUI-VideoHelperSuite\          ← video load / save
     __init__.py
     requirements.txt
     ...
-  rtx_vsr_single_frame_node\         ← nuestro nodo custom
+  rtx_vsr_single_frame_node\         ← our custom node
     __init__.py
     rtx_vsr_single_frame_node.py
     README.md
@@ -181,23 +176,23 @@ C:\ComfyUI\custom_nodes\
 
 ---
 
-## Nodos por workflow
+## Node requirements per workflow
 
-| Workflow | Nodos necesarios |
-|----------|-----------------|
+| Workflow | Required nodes |
+|----------|---------------|
 | `01_quick_4x_upscale` | `rtx_vsr_single_frame_node` |
 | `02_before_after_preview` | `rtx_vsr_single_frame_node` |
 | `03_2x_vs_4x_comparison` | `rtx_vsr_single_frame_node` |
 | `04_denoise_then_upscale` | `rtx_vsr_single_frame_node` + `Nvidia_RTX_Nodes_ComfyUI` |
 | `05_video_frame_sampler` | `rtx_vsr_single_frame_node` + `ComfyUI-VideoHelperSuite` |
 | `06_upscale_then_crop` | `rtx_vsr_single_frame_node` |
-| `07_ai_gen_image_enhance` | `rtx_vsr_single_frame_node` + cualquier checkpoint SD |
+| `07_ai_gen_image_enhance` | `rtx_vsr_single_frame_node` + any SD checkpoint |
 
 ---
 
-## Actualizar nodos
+## Updating nodes
 
-Para actualizar un nodo clonado con git:
+To update a cloned node:
 
 ```powershell
 cd C:\ComfyUI\custom_nodes\Nvidia_RTX_Nodes_ComfyUI
@@ -207,14 +202,14 @@ cd C:\ComfyUI\custom_nodes\ComfyUI-VideoHelperSuite
 git pull
 ```
 
-Para actualizar nuestro nodo custom, vuelve a copiar la carpeta
-`rtx_vsr_single_frame_node` desde este repositorio.
+To update our custom node, re-copy the `rtx_vsr_single_frame_node` folder
+from this repository, or re-run `install_nodes.ps1`.
 
 ---
 
-## Verificar que los nodos están activos
+## Verifying nodes loaded correctly
 
-En el terminal donde corre ComfyUI, al arrancar deberías ver líneas como:
+In the terminal where ComfyUI runs, at startup you should see lines like:
 
 ```
 [RTX VSR Node] Loading RTX VSR Single Frame Node...
@@ -222,4 +217,4 @@ Import success: Nvidia_RTX_Nodes_ComfyUI
 Import success: ComfyUI-VideoHelperSuite
 ```
 
-Si ves un error de importación, revisa [docs/troubleshooting.md](../docs/troubleshooting.md).
+If you see an import error, check [docs/troubleshooting.md](../docs/troubleshooting.md).

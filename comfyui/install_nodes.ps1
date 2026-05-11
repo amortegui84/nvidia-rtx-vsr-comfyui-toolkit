@@ -1,13 +1,13 @@
 # install_nodes.ps1
 # -----------------
-# Instala automaticamente todos los nodos de ComfyUI necesarios para
-# el toolkit NVIDIA RTX VSR.
+# Automatically installs all ComfyUI nodes required for the
+# NVIDIA RTX VSR toolkit.
 #
-# Uso:
+# Usage:
 #   .\comfyui\install_nodes.ps1
 #   .\comfyui\install_nodes.ps1 -ComfyUIPath "D:\ComfyUI"
 #
-# Ejecutar desde la raiz del proyecto.
+# Run from the project root.
 
 param(
     [string]$ComfyUIPath = ""
@@ -15,21 +15,20 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# ── Colores ────────────────────────────────────────────────────────────────────
-function Write-Pass  { param($msg) Write-Host "[PASS] $msg" -ForegroundColor Green  }
-function Write-Fail  { param($msg) Write-Host "[FAIL] $msg" -ForegroundColor Red    }
-function Write-Warn  { param($msg) Write-Host "[WARN] $msg" -ForegroundColor Yellow }
-function Write-Info  { param($msg) Write-Host "[INFO] $msg" -ForegroundColor Cyan   }
-function Write-Step  { param($msg) Write-Host "`n── $msg" -ForegroundColor White   }
+function Write-Pass { param($msg) Write-Host "[PASS] $msg" -ForegroundColor Green  }
+function Write-Fail { param($msg) Write-Host "[FAIL] $msg" -ForegroundColor Red    }
+function Write-Warn { param($msg) Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function Write-Info { param($msg) Write-Host "[INFO] $msg" -ForegroundColor Cyan   }
+function Write-Step { param($msg) Write-Host "`n-- $msg" -ForegroundColor White    }
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  NVIDIA RTX VSR — ComfyUI Node Installer " -ForegroundColor Cyan
+Write-Host "  NVIDIA RTX VSR -- ComfyUI Node Installer" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Localizar ComfyUI ─────────────────────────────────────────────────────────
-Write-Step "Localizando ComfyUI"
+# ── Locate ComfyUI ────────────────────────────────────────────────────────────
+Write-Step "Locating ComfyUI installation"
 
 $commonPaths = @(
     "C:\ComfyUI",
@@ -44,42 +43,42 @@ if ($ComfyUIPath -eq "") {
     foreach ($p in $commonPaths) {
         if (Test-Path "$p\custom_nodes") {
             $ComfyUIPath = $p
-            Write-Pass "ComfyUI encontrado en: $ComfyUIPath"
+            Write-Pass "ComfyUI found at: $ComfyUIPath"
             break
         }
     }
 }
 
 if ($ComfyUIPath -eq "" -or !(Test-Path "$ComfyUIPath\custom_nodes")) {
-    Write-Warn "No se pudo detectar ComfyUI automaticamente."
-    $ComfyUIPath = Read-Host "Ingresa la ruta completa a tu instalacion de ComfyUI (ej: C:\ComfyUI)"
+    Write-Warn "Could not auto-detect ComfyUI."
+    $ComfyUIPath = Read-Host "Enter the full path to your ComfyUI installation (e.g. C:\ComfyUI)"
     if (!(Test-Path "$ComfyUIPath\custom_nodes")) {
-        Write-Fail "La carpeta custom_nodes no existe en: $ComfyUIPath"
-        Write-Host "Verifica que ComfyUI este instalado correctamente."
+        Write-Fail "custom_nodes folder not found at: $ComfyUIPath"
+        Write-Host "Make sure ComfyUI is installed correctly."
         exit 1
     }
 }
 
 $customNodes = "$ComfyUIPath\custom_nodes"
-Write-Info "custom_nodes: $customNodes"
+Write-Info "custom_nodes path: $customNodes"
 
-# ── Verificar git ─────────────────────────────────────────────────────────────
-Write-Step "Verificando dependencias"
+# ── Check dependencies ────────────────────────────────────────────────────────
+Write-Step "Checking dependencies"
 
 if (!(Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Fail "git no esta instalado o no esta en PATH."
-    Write-Host "Descarga git desde: https://git-scm.com/download/win"
+    Write-Fail "git is not installed or not in PATH."
+    Write-Host "Download from: https://git-scm.com/download/win"
     exit 1
 }
 Write-Pass "git: $(git --version)"
 
 if (!(Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Fail "python no encontrado en PATH."
+    Write-Fail "python not found in PATH."
     exit 1
 }
 Write-Pass "python: $(python --version)"
 
-# ── Funcion para clonar o actualizar un repo ──────────────────────────────────
+# ── Clone or update a repo ────────────────────────────────────────────────────
 function Install-Node {
     param(
         [string]$Name,
@@ -90,32 +89,32 @@ function Install-Node {
 
     $destPath = "$customNodes\$DestFolder"
 
-    Write-Step "Nodo: $Name"
+    Write-Step "Node: $Name"
 
     if (Test-Path "$destPath\.git") {
-        Write-Info "Ya existe. Actualizando con git pull..."
+        Write-Info "Already installed. Updating with git pull..."
         Push-Location $destPath
         git pull --ff-only 2>&1 | ForEach-Object { Write-Host "  $_" }
         Pop-Location
-        Write-Pass "$Name actualizado."
+        Write-Pass "$Name updated."
     } else {
         if (Test-Path $destPath) {
-            Write-Warn "La carpeta existe pero no es un repo git. Eliminando para clonar limpio..."
+            Write-Warn "Folder exists but is not a git repo. Removing to clone fresh..."
             Remove-Item -Recurse -Force $destPath
         }
-        Write-Info "Clonando desde $RepoUrl ..."
+        Write-Info "Cloning from $RepoUrl ..."
         git clone $RepoUrl $destPath 2>&1 | ForEach-Object { Write-Host "  $_" }
-        Write-Pass "$Name clonado en: $destPath"
+        Write-Pass "$Name cloned to: $destPath"
     }
 
     if ($RequirementsTxt -ne "" -and (Test-Path "$destPath\$RequirementsTxt")) {
-        Write-Info "Instalando requirements ($RequirementsTxt)..."
+        Write-Info "Installing requirements ($RequirementsTxt)..."
         python -m pip install -r "$destPath\$RequirementsTxt" --quiet
-        Write-Pass "Requirements instalados."
+        Write-Pass "Requirements installed."
     }
 }
 
-# ── Funcion para copiar nuestro custom node ───────────────────────────────────
+# ── Copy our local custom node ────────────────────────────────────────────────
 function Install-LocalNode {
     param(
         [string]$Name,
@@ -123,90 +122,85 @@ function Install-LocalNode {
         [string]$DestFolder
     )
 
-    Write-Step "Nodo local: $Name"
+    Write-Step "Local node: $Name"
 
-    $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    # Si se ejecuta desde la raiz, ajustar
-    if (!(Test-Path "$projectRoot\comfyui")) {
-        $projectRoot = Get-Location
-    }
-
-    $sourcePath = "$projectRoot\comfyui\custom_nodes\$SourceFolder"
-    $destPath   = "$customNodes\$DestFolder"
+    $scriptDir   = Split-Path -Parent $MyInvocation.ScriptName
+    $projectRoot = Split-Path -Parent $scriptDir
+    $sourcePath  = "$projectRoot\comfyui\custom_nodes\$SourceFolder"
+    $destPath    = "$customNodes\$DestFolder"
 
     if (!(Test-Path $sourcePath)) {
-        # Intentar relativo al script
-        $sourcePath = "$PSScriptRoot\custom_nodes\$SourceFolder"
+        $sourcePath = "$scriptDir\custom_nodes\$SourceFolder"
     }
 
     if (!(Test-Path $sourcePath)) {
-        Write-Fail "No se encuentra el nodo fuente en: $sourcePath"
+        Write-Fail "Source node not found at: $sourcePath"
         return
     }
 
     if (Test-Path $destPath) {
-        Write-Info "Ya existe. Sobreescribiendo archivos..."
+        Write-Info "Already exists. Overwriting..."
         Remove-Item -Recurse -Force $destPath
     }
 
     Copy-Item -Recurse -Force $sourcePath $destPath
-    Write-Pass "$Name copiado en: $destPath"
+    Write-Pass "$Name copied to: $destPath"
 }
 
-# ── Instalacion de nodos ──────────────────────────────────────────────────────
+# ── Install nodes ─────────────────────────────────────────────────────────────
 
-# 1. NVIDIA RTX Nodes (oficial de Comfy-Org)
+# 1. Official NVIDIA RTX Nodes for ComfyUI
 Install-Node `
-    -Name        "NVIDIA RTX Nodes for ComfyUI (oficial)" `
-    -RepoUrl     "https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git" `
-    -DestFolder  "Nvidia_RTX_Nodes_ComfyUI" `
+    -Name            "NVIDIA RTX Nodes for ComfyUI (official)" `
+    -RepoUrl         "https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git" `
+    -DestFolder      "Nvidia_RTX_Nodes_ComfyUI" `
     -RequirementsTxt "requirements.txt"
 
-# 2. ComfyUI-VideoHelperSuite (VHS) — necesario para workflows de video
+# 2. ComfyUI-VideoHelperSuite — required for video workflows
 Install-Node `
-    -Name        "ComfyUI-VideoHelperSuite (VHS)" `
-    -RepoUrl     "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git" `
-    -DestFolder  "ComfyUI-VideoHelperSuite" `
+    -Name            "ComfyUI-VideoHelperSuite (VHS)" `
+    -RepoUrl         "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git" `
+    -DestFolder      "ComfyUI-VideoHelperSuite" `
     -RequirementsTxt "requirements.txt"
 
-# 3. Nuestro nodo custom RTX VSR Single Frame
+# 3. Our custom RTX VSR Single Frame node
 Install-LocalNode `
-    -Name        "RTX VSR Single Frame Node (este toolkit)" `
+    -Name         "RTX VSR Single Frame Node (this toolkit)" `
     -SourceFolder "rtx_vsr_single_frame_node" `
     -DestFolder   "rtx_vsr_single_frame_node"
 
-# ── Instalar nvidia-vfx ───────────────────────────────────────────────────────
-Write-Step "Instalando nvidia-vfx"
+# ── Install nvidia-vfx ────────────────────────────────────────────────────────
+Write-Step "Installing nvidia-vfx"
 
 $nvvfxCheck = python -c "import nvvfx; print('ok')" 2>&1
 if ($nvvfxCheck -eq "ok") {
-    Write-Pass "nvidia-vfx ya esta instalado."
+    Write-Pass "nvidia-vfx is already installed."
 } else {
-    Write-Info "Instalando nvidia-vfx desde pypi.nvidia.com ..."
+    Write-Info "Installing nvidia-vfx from pypi.nvidia.com ..."
     python -m pip install -U --no-build-isolation nvidia-vfx `
         --index-url https://pypi.nvidia.com 2>&1 | ForEach-Object { Write-Host "  $_" }
 
     $nvvfxCheck2 = python -c "import nvvfx; print('ok')" 2>&1
     if ($nvvfxCheck2 -eq "ok") {
-        Write-Pass "nvidia-vfx instalado correctamente."
+        Write-Pass "nvidia-vfx installed successfully."
     } else {
-        Write-Warn "nvidia-vfx no se pudo verificar. Intenta manualmente:"
+        Write-Warn "Could not verify nvidia-vfx. Try manually:"
         Write-Host "  python -m pip install -U --no-build-isolation nvidia-vfx --index-url https://pypi.nvidia.com"
     }
 }
 
-# ── Resumen ───────────────────────────────────────────────────────────────────
+# ── Summary ───────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  Instalacion completa" -ForegroundColor Cyan
+Write-Host "  Installation complete" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Nodos instalados en: $customNodes" -ForegroundColor White
+Write-Host "Nodes installed in: $customNodes" -ForegroundColor White
 Write-Host ""
-Write-Host "  Nvidia_RTX_Nodes_ComfyUI\        (nodos oficiales NVIDIA)" -ForegroundColor Green
-Write-Host "  ComfyUI-VideoHelperSuite\         (carga/guarda video)" -ForegroundColor Green
-Write-Host "  rtx_vsr_single_frame_node\        (nuestro nodo custom)" -ForegroundColor Green
+Write-Host "  Nvidia_RTX_Nodes_ComfyUI\     (official NVIDIA nodes)" -ForegroundColor Green
+Write-Host "  ComfyUI-VideoHelperSuite\     (load / save video)" -ForegroundColor Green
+Write-Host "  rtx_vsr_single_frame_node\    (our custom node)" -ForegroundColor Green
 Write-Host ""
-Write-Host "Siguiente paso: reinicia ComfyUI y busca los nodos en:" -ForegroundColor Yellow
+Write-Host "Next step: restart ComfyUI and search for:" -ForegroundColor Yellow
 Write-Host "  NVIDIA RTX / Super Resolution -> RTX VSR Single Frame Upscale" -ForegroundColor Yellow
 Write-Host ""
